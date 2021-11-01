@@ -12,6 +12,7 @@ class Order extends Model
 
     protected $casts = ['api_data' => 'array'];
     protected $hidden = ["api_data"];
+    protected $guarded = [];
 
     public function user()
     {
@@ -21,5 +22,10 @@ class Order extends Model
     public function bankAccount()
     {
         return $this->belongsTo(BankAccount::class);
+    }
+
+    public function coin()
+    {
+        return $this->belongsTo(Coin::class);
     }
 }

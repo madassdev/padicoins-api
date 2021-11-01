@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Bank;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Http;
 
 class BankSeeder extends Seeder
 {
@@ -15,12 +16,11 @@ class BankSeeder extends Seeder
     public function run()
     {
         //
-        $banks = nuban();
+        $banks = Http::get('https://merchant.birrionapi.com/api/get-banks')->json()['data'];
+        foreach ($banks as $bank) {
 
-
-        foreach ($banks as $code => $bank) {
-
-            Bank::updateOrCreate(['code' => $code], ['name' => $bank, 'code' => $code]);
+            Bank::updateOrCreate(['code' => $bank['code']], ['name' => $bank['name'], 'code' => $bank['code']]);
         }
+        return Bank::all();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\Str;
 
 function nuban($bank = null)
 {
@@ -44,4 +45,9 @@ function cfg($key = null){
     }
 
     return $config;
+}
+
+function generate_track_id()
+{
+    return strtolower(Str::random(6));
 }

@@ -19,9 +19,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::group(['prefix' => 'auth'], function(){
+Route::group(['prefix' => 'auth'], function () {
     Route::get('/', 'UserController@index');
 });
 
 Route::post('/orders', 'OrderController@order');
 Route::post('/verification/bank', 'OrderController@verifyBank');
+Route::get('/orders/callback/{track_id}', 'OrderController@orderCallback')->name('orders.callback');
+Route::post('/seed', 'OrderController@seed');

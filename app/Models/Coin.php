@@ -6,15 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Bank extends Model
+class Coin extends Model
 {
     use HasFactory, SoftDeletes;
     protected $guarded = [];
 
-    protected $fillable = ['name', 'code'];
-
-    public function bankAccounts()
+    public function orders()
     {
-        return $this->hasMany(BankAccount::class);
+        return $this->hasMany(Order::class);
     }
 }

@@ -17,11 +17,13 @@ class CreateOrdersTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
-            $table->string('status')->default('pending');
+            $table->foreignId('coin_id')->constrained()->cascadeOnDelete();
             $table->string('track_id');
-            $table->softDeletes();
+            $table->string('coin');
             $table->string('wallet_address');
+            $table->string('status')->default('pending');
             $table->text('api_data')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

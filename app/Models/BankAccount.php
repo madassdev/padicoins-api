@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class BankAccount extends Model
 {
     use HasFactory, SoftDeletes;
+    protected $guarded = [];
 
     public function user()
     {
@@ -18,6 +19,11 @@ class BankAccount extends Model
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class);
     }
 }
 

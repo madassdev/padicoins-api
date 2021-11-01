@@ -40,5 +40,6 @@ class DatabaseSeeder extends Seeder
             return AppConfig::updateOrCreate(['key' => $config['key']], $config);
         });
         $this->call(BankSeeder::class);
+        $this->call(CoinSeeder::class);
     }
 }
