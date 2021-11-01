@@ -38,7 +38,8 @@ class OrderController extends Controller
 
         $bank = Bank::find($request->bank_id);
 
-        // Check from Paystack
+        // Validate from Paystack
+
         try {
             $data = Paystack::getBankDetails($request->account_number, $bank);
         } catch (Exception) {

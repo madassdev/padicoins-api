@@ -39,5 +39,6 @@ class DatabaseSeeder extends Seeder
         collect($configs)->map(function ($config) {
             return AppConfig::updateOrCreate(['key' => $config['key']], $config);
         });
+        $this->call(BankSeeder::class);
     }
 }
