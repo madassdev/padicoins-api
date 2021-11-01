@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
         $configs = [
             [
                 'key' => 'paystack_secret_key_test',
-                'value' => 'sk_test_cc8 f2f5a5dc2b79a638e93b3d42306a53fb13f3d',
+                'value' => 'sk_test_cc8f2f5a5dc2b79a638e93b3d42306a53fb13f3d',
             ],
             [
                 'key' => 'paystack_public_key_test',

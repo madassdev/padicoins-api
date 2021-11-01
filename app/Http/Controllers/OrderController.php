@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bank;
 use App\Models\BankAccount;
-use App\Models\Currency;
+use App\Models\Coin;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Paystack;
@@ -24,7 +24,7 @@ class OrderController extends Controller
             "account_number" => "required|numeric|digits:10",
             "email" => "required|email|max:255",
             "mobile" => "required|numeric|digits:11",
-            "currency_id" => "required|exists:currencies,id",
+            "coin_id" => "required|exists:coins,id",
         ]);
 
         // Save User
@@ -36,7 +36,7 @@ class OrderController extends Controller
         ]);
 
         $bank = Bank::find($request->bank_id);
-        $currency = Currency::find($request->currency_id);
+        $coin = Coin::find($request->coin_id);
 
         // Validate from Paystack
         try {
@@ -55,7 +55,8 @@ class OrderController extends Controller
         ], [
             "bank_id" => $request->bank_id,
             "account_number" => $request->account_number,
-            "bank_name" => $bank->name
+            "bank_name" => $bank->name,
+            "account_name" => $data->data->account_name
         ]);
 
         //Prepare blockchain
@@ -64,14 +65,17 @@ class OrderController extends Controller
             $callback = route('orders.callback', ['track_id' => $track_id]);
             $wallet_address = "wallet_address_goes_here";
             $data = ["callback" => $callback, "address" => $wallet_address];
+            // https://api.blockchain.info/v2/receive?xpub=$xpub&callback=$callback_url&key=$key&gap_limit=$gap_limit
+
         // }
-        return $callback;
 
         // Place Order
         $order = $user->orders()->create([
             "bank_account_id" => $bank_account->id,
             "track_id" => $track_id,
             "wallet_address" => $wallet_address,
+            "coin_id" => $coin->id,
+            "coin" => $coin->title,
             "api_data" => json_encode($data),
         ]);
 
@@ -79,8 +83,8 @@ class OrderController extends Controller
             "success" => true,
             "message" => "Order initialized successfully",
             "data" => [
+                "order" => $order->load('coin', 'bankAccount'),
                 "user" => $user,
-                "order" => $order->load('currency', 'bankAccount'),
             ]
         ]);
 

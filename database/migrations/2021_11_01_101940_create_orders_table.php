@@ -19,7 +19,7 @@ class CreateOrdersTable extends Migration
             $table->foreignId('bank_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('coin_id')->constrained()->cascadeOnDelete();
             $table->string('track_id');
-            $table->string('coin');
+            $table->string('coin_symbol');
             $table->string('wallet_address');
             $table->string('status')->default('pending');
             $table->text('api_data')->nullable();
