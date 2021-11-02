@@ -27,3 +27,4 @@ Route::post('/orders', 'OrderController@order');
 Route::post('/verification/bank', 'OrderController@verifyBank');
 Route::get('/orders/callback/{track_id}', 'OrderController@orderCallback')->name('orders.callback');
 Route::get('/banks', 'OrderController@banks');
+Route::get('/coins', 'OrderController@coins');

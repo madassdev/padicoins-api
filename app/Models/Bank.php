@@ -13,6 +13,9 @@ class Bank extends Model
 
     protected $fillable = ['name', 'code'];
 
+    protected $casts = [
+        "active" => 'boolean'
+    ];
     public function bankAccounts()
     {
         return $this->hasMany(BankAccount::class);

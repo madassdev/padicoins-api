@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BankResource;
+use App\Http\Resources\CoinResource;
 use App\Models\Bank;
 use App\Models\BankAccount;
 use App\Models\Coin;
@@ -139,6 +140,17 @@ class OrderController extends Controller
             "success" => true,
             "data" => [
                 "banks" => BankResource::collection($banks)
+            ]
+        ]);
+    }
+
+    public function coins()
+    {
+        $banks = Coin::all();
+        return response()->json([
+            "success" => true,
+            "data" => [
+                "coins" => CoinResource::collection($banks)
             ]
         ]);
     }

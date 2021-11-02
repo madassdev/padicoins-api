@@ -10,7 +10,9 @@ class Coin extends Model
 {
     use HasFactory, SoftDeletes;
     protected $guarded = [];
-
+    protected $casts = [
+        "active" => 'boolean'
+    ];
     public function orders()
     {
         return $this->hasMany(Order::class);
