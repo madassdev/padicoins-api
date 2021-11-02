@@ -19,9 +19,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::group(['prefix' => 'auth'], function () {
-    Route::get('/', 'UserController@index');
+Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
+    Route::post('/login', 'LoginController@login');
+    
 });
+
+
 
 Route::post('/orders', 'OrderController@order');
 Route::post('/verification/bank', 'OrderController@verifyBank');
