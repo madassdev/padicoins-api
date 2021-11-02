@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\BankResource;
 use App\Http\Resources\CoinResource;
+use App\Http\Resources\OrderResource;
 use App\Models\Bank;
 use App\Models\BankAccount;
 use App\Models\Coin;
@@ -85,8 +86,7 @@ class OrderController extends Controller
             "success" => true,
             "message" => "Order initialized successfully",
             "data" => [
-                "order" => $order->load('coin', 'bankAccount'),
-                "user" => $user,
+                "order" => new OrderResource($order->refresh()->load('coin', 'bankAccount')),
             ]
         ]);
 
