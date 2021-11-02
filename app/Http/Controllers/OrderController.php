@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BankResource;
 use App\Models\Bank;
 use App\Models\BankAccount;
 use App\Models\Coin;
@@ -131,10 +132,15 @@ class OrderController extends Controller
         ]);
     }
 
-    public function seed()
+    public function banks()
     {
-        
-
+        $banks = Bank::all();
+        return response()->json([
+            "success" => true,
+            "data" => [
+                "banks" => BankResource::collection($banks)
+            ]
+        ]);
     }
 
     public function orderCallBack($track_id)

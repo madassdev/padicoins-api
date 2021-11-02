@@ -26,4 +26,4 @@ Route::group(['prefix' => 'auth'], function () {
 Route::post('/orders', 'OrderController@order');
 Route::post('/verification/bank', 'OrderController@verifyBank');
 Route::get('/orders/callback/{track_id}', 'OrderController@orderCallback')->name('orders.callback');
-Route::post('/seed', 'OrderController@seed');
+Route::get('/banks', 'OrderController@banks');
