@@ -10,11 +10,16 @@ class BankAccount extends Model
 {
     use HasFactory, SoftDeletes;
     protected $guarded = [];
+    
+    protected $casts = [
+        "active" => 'boolean'
+    ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+    
 
     public function orders()
     {

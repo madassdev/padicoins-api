@@ -14,6 +14,15 @@ class BankAccountResource extends JsonResource
      */
     public function toArray($request)
     {
+        return [
+            "id" => $this->id,
+            "bank_id" => $this->bank_id,
+            "account_number" => $this->account_number,
+            "account_name" => $this->account_name,
+            "bank_name" => $this->bank_name,
+            "active" => $this->active,
+            "user" => new UserResource($this->whenLoaded('user'))
+        ];
         return parent::toArray($request);
     }
 }

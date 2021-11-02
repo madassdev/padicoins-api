@@ -23,7 +23,9 @@ class OrderResource extends JsonResource
             "coin_symbol" => $this->coin_symbol,
             "coin" => new CoinResource($this->coin),
             "bank_account" => new BankAccountResource($this->bankAccount),
-            "user" => new UserResource($this->user)
+            "user" => new UserResource($this->user),
+            "created_at" => $this->created_at,
+            "updated_at" => $this->updated_at,
         ];
     }
 }

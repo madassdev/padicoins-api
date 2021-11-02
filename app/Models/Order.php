@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Order extends Model
 {
     use HasFactory, SoftDeletes;
-
     protected $casts = ['api_data' => 'array'];
     protected $hidden = ["api_data"];
     protected $guarded = [];
@@ -27,5 +26,11 @@ class Order extends Model
     public function coin()
     {
         return $this->belongsTo(Coin::class);
+    }
+
+    public function markAsComplete()
+    {
+        $this->complete = true;
+        $this->save();
     }
 }

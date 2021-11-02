@@ -11,6 +11,7 @@ use App\Models\Coin;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Paystack;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -64,11 +65,11 @@ class OrderController extends Controller
 
         //Prepare blockchain
         // {
-            $track_id = generate_track_id();
-            $callback = route('orders.callback', ['track_id' => $track_id]);
-            $wallet_address = "wallet_address_goes_here";
-            $data = ["callback" => $callback, "address" => $wallet_address];
-            // https://api.blockchain.info/v2/receive?xpub=$xpub&callback=$callback_url&key=$key&gap_limit=$gap_limit
+        $track_id = generate_track_id();
+        $callback = route('orders.callback', ['track_id' => $track_id]);
+        $wallet_address = "wallet_address_goes_here";
+        $data = ["callback" => $callback, "address" => $wallet_address];
+        // https://api.blockchain.info/v2/receive?xpub=$xpub&callback=$callback_url&key=$key&gap_limit=$gap_limit
 
         // }
 
@@ -163,5 +164,21 @@ class OrderController extends Controller
         // Notify Admin
 
         return $track_id;
+    }
+
+    public function trackOrder($track_id)
+    {
+        $order = Order::whereTrackId($track_id)->first();
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => "Order with Track ID: $track_id not found!"], 404);
+        }
+
+        return response()->json([
+            "success" => true,
+            "message" => "Order with Track ID: $track_id retrieved successfully.",
+            "data" => [
+                "order" => new OrderResource($order->refresh()->load('coin', 'bankAccount')),
+            ]
+        ]);
     }
 }
