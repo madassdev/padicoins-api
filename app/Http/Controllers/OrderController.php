@@ -77,7 +77,7 @@ class OrderController extends Controller
             "track_id" => $track_id,
             "wallet_address" => $wallet_address,
             "coin_id" => $coin->id,
-            "coin" => $coin->title,
+            "coin_symbol" => $coin->title,
             "api_data" => json_encode($data),
         ]);
 

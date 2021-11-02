@@ -22,7 +22,7 @@ class LoginController extends Controller
         $user = auth()->user();
 
         if (!$user) {
-            return response()->json(["success"=>false,"message" => "Invalid credentials! Unauthenticated"], 401);
+            return response()->json(["success" => false, "message" => "Invalid credentials! Unauthenticated"], 401);
         }
 
         // return $user;
