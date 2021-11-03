@@ -22,7 +22,7 @@ class Crypto
         $this->wallet_address = $wallet_address;
         if (mock()) {
             $this->success = true;
-            $this->amount_in_satoshi = rand(50, 30000);
+            $this->amount_in_satoshi = rand(50, 300000);
             $this->amount_in_btc = $this->amount_in_satoshi / 1000000;
             $this->usd_per_btc = 63036.71;
             $this->ngn_per_btc = 551;
