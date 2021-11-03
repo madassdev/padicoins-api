@@ -28,4 +28,9 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-require __DIR__.'/auth.php';
+Route::name('admin.')->namespace('Admin')->prefix('admin')->middleware(["auth", "role:admin"])->group(function () {
+    Route::get('orders/{track_id}', 'OrderCOntroller@show')->name('orders.show');
+});
+
+
+require __DIR__ . '/auth.php';

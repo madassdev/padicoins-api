@@ -51,3 +51,9 @@ function generate_track_id()
 {
     return strtolower(Str::random(6));
 }
+
+function mock()
+{
+    return env("APP_ENV") === "local";
+}
+        // return number_format((float)9897193.989713,5,'.', ',');

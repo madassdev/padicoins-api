@@ -23,6 +23,9 @@ Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
     Route::post('/login', 'LoginController@login');
 });
 
+Route::group(['namespace' => 'Admin', 'prefix'=>'admin', 'middleware' => ['auth:sanctum', 'role:admin']],function(){
+    Route::apiResource('orders', 'OrderController');
+});
 
 
 Route::post('/orders', 'OrderController@order');

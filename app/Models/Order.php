@@ -9,8 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Order extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $casts = ['api_data' => 'array'];
-    protected $hidden = ["api_data"];
+    protected $casts = [
+        'api_data' => 'array',
+        'callback_data' => 'array',
+        'transaction_data' => 'array',
+];
     protected $guarded = [];
 
     public function user()

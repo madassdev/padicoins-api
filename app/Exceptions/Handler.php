@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -45,6 +46,14 @@ class Handler extends ExceptionHandler
         if ($e instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
 
             return response()->json(['success' => false, 'message' => $e->getMessage()], 405);
+        }
+
+        if($e instanceof UnauthorizedException)
+        {
+            return response()->json([
+                "success" => false,
+                "message" => $e->getMessage(),
+            ], 403);
         }
         return parent::render($request, $e);
     }

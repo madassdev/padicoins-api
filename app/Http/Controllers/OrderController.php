@@ -10,11 +10,14 @@ use App\Models\BankAccount;
 use App\Models\Coin;
 use App\Models\Order;
 use App\Models\User;
+use App\Notifications\CryptoReceivedNotification;
+use App\Services\Crypto;
 use App\Services\Paystack;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 
 class OrderController extends Controller
 {
@@ -49,8 +52,8 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Unknown Error occurred'], 400);
         }
 
-        if (!$data->status) {
-            return response()->json(["success" => false, "message" => $data->message], 400);
+        if (!@$data->status) {
+            return response()->json(["success" => false, "message" => @$data->message ?? "Unknown error occured"], 400);
         }
 
         // Save Bank
@@ -63,24 +66,19 @@ class OrderController extends Controller
             "account_name" => $data->data->account_name
         ]);
 
-        //Prepare blockchain
-        // {
+        //Prepare wallet request
         $track_id = generate_track_id();
-        $callback = route('orders.callback', ['track_id' => $track_id]);
-        $wallet_address = "wallet_address_goes_here";
-        $data = ["callback" => $callback, "address" => $wallet_address];
-        // https://api.blockchain.info/v2/receive?xpub=$xpub&callback=$callback_url&key=$key&gap_limit=$gap_limit
-
-        // }
+        $crypto = new Crypto($coin);
+        $wallet = $crypto->createWallet($track_id);
 
         // Place Order
         $order = $user->orders()->create([
             "bank_account_id" => $bank_account->id,
             "track_id" => $track_id,
-            "wallet_address" => $wallet_address,
+            "wallet_address" => $wallet->wallet_address,
             "coin_id" => $coin->id,
             "coin_symbol" => $coin->title,
-            "api_data" => json_encode($data),
+            "api_data" => $wallet,
         ]);
 
         return response()->json([
@@ -88,6 +86,7 @@ class OrderController extends Controller
             "message" => "Order initialized successfully",
             "data" => [
                 "order" => new OrderResource($order->refresh()->load('coin', 'bankAccount')),
+                // "order" => $order
             ]
         ]);
 
@@ -156,14 +155,57 @@ class OrderController extends Controller
         ]);
     }
 
-    public function orderCallBack($track_id)
+    public function orderCallBack($track_id, Request $request)
     {
-        // Validate transaction
-        // Calculate deposit equivalent,
-        // Save to database
-        // Notify Admin
+        $order = Order::whereTrackId($track_id)->first();
 
-        return $track_id;
+        if(!$order){
+            // Notify Admin of received webhook that does not match an existing order.
+            // Save callback data
+        }
+
+        if($order && $order->status !== 'pending')
+        {
+            // Payment has been received, meanwhile order is not pending at the moment
+            //Notify Admin
+
+        }
+
+        
+        // Validate transaction
+        $crypto = new Crypto($order->coin);
+        $transaction = $crypto->makeTransaction($order->wallet_address);
+
+        // Save to database
+        if($transaction->success){
+
+            $order->status = 'received';
+            $order->received_at = Carbon::now();
+            $order->amount_received = $transaction->amount_in_btc;
+            $order->amount_in_usd = $transaction->amount_in_usd;
+            $order->amount_in_ngn = $transaction->amount_in_ngn;
+            $order->callback_data = $request->fullUrl();
+            $order->transaction_data = $transaction;
+            $order->save();
+            return $order;
+
+            // Notify Admin
+            $admins = User::role('admin')->get();
+            // return $admins;
+            Notification::send($admins, new CryptoReceivedNotification($order));
+            return response()->json([
+                "success" => true,
+                "message" => "Payment transaction validated successfully!",
+                "data" => [
+                    "order" => $order
+                ]
+            ]);
+        }else{
+            // A Failed transaction
+            // Notiy Admin
+            // Handle Accordingly
+        }
+
     }
 
     public function trackOrder($track_id)

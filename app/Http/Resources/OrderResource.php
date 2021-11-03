@@ -12,6 +12,25 @@ class OrderResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
+
+    public static function collection($data)
+    {
+        /* is_a() makes sure that you don't just match AbstractPaginator
+         * instances but also match anything that extends that class.
+         */
+        if (is_a($data, \Illuminate\Pagination\AbstractPaginator::class)) {
+            $data->setCollection(
+                $data->getCollection()->map(function ($listing) {
+                    return new static($listing);
+                })
+            );
+
+            return $data;
+        }
+
+        return parent::collection($data);
+    }
+
     public function toArray($request)
     {
         return [
@@ -21,6 +40,20 @@ class OrderResource extends JsonResource
             "wallet_address" => $this->wallet_address,
             "coin_id" => $this->coin_id,
             "coin_symbol" => $this->coin_symbol,
+            "received_at" => $this->received_at,
+            "amount_received" => $this->amount_received,
+            "amount_in_btc" => $this->amount_in_btc,
+            "amount_in_ngn" => $this->amount_in_ngn,
+            "paid_at" => $this->paid_at,
+            "amount_paid" => $this->amount_paid,
+            "currency_paid" => $this->currency_paid,
+            "complete" => $this->complete,
+            $this->mergeWhen(auth()->user()->hasRole('admin'), [
+                "api_data" => $this->api_data,
+                "callback_data" => $this->callback_data,
+                "transaction_data" => $this->transaction_data,
+
+            ]),
             "coin" => new CoinResource($this->coin),
             "bank_account" => new BankAccountResource($this->bankAccount),
             "user" => new UserResource($this->user),
