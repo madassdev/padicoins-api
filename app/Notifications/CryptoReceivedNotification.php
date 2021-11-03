@@ -54,7 +54,7 @@ class CryptoReceivedNotification extends Notification
                     ->subject("New $coin_name deposit received!")
                     ->greeting("Payment received")
                     ->line("A user with email: **{$order->user->email}** has made a deposit.")
-                    ->line("**TRANSACTION DETAILS \r\n**")
+                    ->line("**TRANSACTION DETAILS** \r\n")
                     ->line("Coin: **{$coin->name}**")
                     ->line("Amount received: **$amount_received {$coin->symbol}**")
                     ->line("USD Equivalent: **{$amount_in_usd}USD**")
