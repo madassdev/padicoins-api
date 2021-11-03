@@ -48,7 +48,7 @@ class OrderResource extends JsonResource
             "amount_paid" => $this->amount_paid,
             "currency_paid" => $this->currency_paid,
             "complete" => $this->complete,
-            $this->mergeWhen(auth()->user()->hasRole('admin'), [
+            $this->mergeWhen(auth()->user() && auth()->user()->hasRole('admin'), [
                 "api_data" => $this->api_data,
                 "callback_data" => $this->callback_data,
                 "transaction_data" => $this->transaction_data,

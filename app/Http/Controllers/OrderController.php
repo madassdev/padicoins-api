@@ -18,6 +18,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 class OrderController extends Controller
 {
@@ -35,7 +36,8 @@ class OrderController extends Controller
         ]);
 
         // Save User
-        $user = User::updateOrCreate(['email' => $request->email], [
+        
+        $user = User::firstOrCreate(['email' => $request->email], [
             "name" => $request->name,
             "email" => $request->email,
             "mobile" => $request->mobile,
@@ -192,7 +194,11 @@ class OrderController extends Controller
             // Notify Admin
             $admins = User::role('admin')->get();
             // return $admins;
-            Notification::send($admins, new CryptoReceivedNotification($order));
+            try{
+                Notification::send($admins, new CryptoReceivedNotification($order));
+            }catch(Throwable $th){
+                // Save to db
+            }
             return response()->json([
                 "success" => true,
                 "message" => "Payment transaction validated successfully!",
