@@ -192,11 +192,12 @@ class OrderController extends Controller
             // Notify Admin
             $admins = User::role('admin')->get();
             // return $admins;
-            try{
-                Notification::send($admins, new CryptoReceivedNotification($order));
-            }catch(Throwable $th){
-                // Save to db
-            }
+            Notification::send($admins, new CryptoReceivedNotification($order));
+            // try{
+
+            // }catch(Throwable $th){
+            //     // Save to db
+            // }
             return response()->json([
                 "success" => true,
                 "message" => "Payment transaction validated successfully!",
