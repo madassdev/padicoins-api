@@ -13,6 +13,13 @@ class Order extends Model
         'api_data' => 'array',
         'callback_data' => 'array',
         'transaction_data' => 'array',
+        'amount_received' => 'float',
+        'amount_in_ngn' => 'float',
+        'amount_in_usd' => 'float',
+        'amount_paid' => 'float',
+        'complete' => 'bool',
+        'paid_at' => 'date',
+        'received_at' => 'date',
 ];
     protected $guarded = [];
 

@@ -42,7 +42,7 @@ class OrderResource extends JsonResource
             "coin_symbol" => $this->coin_symbol,
             "received_at" => $this->received_at,
             "amount_received" => $this->amount_received,
-            "amount_in_btc" => $this->amount_in_btc,
+            "amount_in_usd" => $this->amount_in_usd,
             "amount_in_ngn" => $this->amount_in_ngn,
             "paid_at" => $this->paid_at,
             "amount_paid" => $this->amount_paid,

@@ -86,7 +86,7 @@ class OrderController extends Controller
             "success" => true,
             "message" => "Order initialized successfully",
             "data" => [
-                "order" => new OrderResource($order->refresh()->load('coin', 'bankAccount')),
+                "order" => new OrderResource($order->refresh()->load('user','coin', 'bankAccount')),
                 // "order" => $order
             ]
         ]);
