@@ -36,7 +36,6 @@ class OrderController extends Controller
         ]);
 
         // Save User
-        
         $user = User::firstOrCreate(['email' => $request->email], [
             "name" => $request->name,
             "email" => $request->email,
@@ -189,7 +188,6 @@ class OrderController extends Controller
             $order->callback_data = $request->fullUrl();
             $order->transaction_data = $transaction;
             $order->save();
-            return $order;
 
             // Notify Admin
             $admins = User::role('admin')->get();
