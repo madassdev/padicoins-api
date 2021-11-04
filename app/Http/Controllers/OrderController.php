@@ -160,7 +160,6 @@ class OrderController extends Controller
         $wcb = WebhookCallback::create([
             "payload" => ['url'=>$request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(), ],
         ]);
-        return $wcb;
         $order = Order::whereTrackId($track_id)->first();
 
         if (!$order) {
