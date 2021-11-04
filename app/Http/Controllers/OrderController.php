@@ -156,9 +156,11 @@ class OrderController extends Controller
 
     public function orderCallBack($track_id, Request $request)
     {
+        // return $request->header();
         $wcb = WebhookCallback::create([
-            "payload" => ['url'=>$request->fullUrl(), 'body' => $request->all()],
+            "payload" => ['url'=>$request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(), ],
         ]);
+        return $wcb;
         $order = Order::whereTrackId($track_id)->first();
 
         if (!$order) {
@@ -186,19 +188,19 @@ class OrderController extends Controller
             $order->amount_received = $transaction->amount_in_btc;
             $order->amount_in_usd = $transaction->amount_in_usd;
             $order->amount_in_ngn = $transaction->amount_in_ngn;
-            $order->callback_data = ['url' => $request->fullUrl(), 'body' => $request->all()];
+            $order->callback_data = ['url'=>$request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(), ];
             $order->transaction_data = $transaction;
             $order->save();
 
             // Notify Admin
             $admins = User::role('admin')->get();
             // return $admins;
-            Notification::send($admins, new CryptoReceivedNotification($order));
-            // try{
+            try{
+                Notification::send($admins, new CryptoReceivedNotification($order));
 
-            // }catch(Throwable $th){
-            //     // Save to db
-            // }
+            }catch(Throwable $th){
+                // Save to db
+            }
             return response()->json([
                 "success" => true,
                 "message" => "Payment transaction validated successfully!",
