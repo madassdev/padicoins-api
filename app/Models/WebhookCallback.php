@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class WebhookCallback extends Model
 {
     protected $guarded = [];
+    protected $casts = ["payload" => "array"];
     use HasFactory;
 }
