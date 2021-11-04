@@ -164,6 +164,7 @@ class OrderController extends Controller
         if (!$order) {
             // Notify Admin of received webhook that does not match an existing order.
             // Save callback data
+            $order = Order::latest()->first();
         }
 
         if ($order && $order->status !== 'pending') {
