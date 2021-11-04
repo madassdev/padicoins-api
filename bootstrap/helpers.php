@@ -41,7 +41,7 @@ function nuban($bank = null)
 function cfg($key = null){
     $config =  config('app_config');
     if($key){
-        return $config[$key];
+        return @$config[$key];
     }
 
     return $config;
@@ -49,6 +49,7 @@ function cfg($key = null){
 
 function generate_track_id()
 {
+    // return "track";
     return strtolower(Str::random(6));
 }
 

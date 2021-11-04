@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\ProductionActionUnavailableException;
 use App\Services\Crypto;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,39 +25,43 @@ class Coin extends Model
         return $this->hasMany(Wallet::class);
     }
 
-    public function createBitcoinWallet(User $user)
+    public function createWallet(User $user)
     {
         $track_id = generate_track_id();
         $crypto = new Crypto($this);
-        $btc_wallet = $crypto->createBitcoinWallet($track_id);
-        $wallet = $this->wallets()->create([
-            "user_id" => $user->id,
-            'track_id' => $track_id,
-            'provider' => $btc_wallet->provider ?? 'TestServer',
-            'coin_symbol' => $this->symbol,
-            'address' => $btc_wallet->wallet_address,
-            'private_key' => $btc_wallet->private_key,
-            'public_key' => $btc_wallet->public_key,
-            'wif' => $btc_wallet->wif ?? "N/A",
-            'payload' => $btc_wallet,
-            'webhook_url' => $btc_wallet->webhook_url,
-        ]);
 
-        $wallet->refresh();
-        return $wallet;
-    }
-
-    public function createWallet(User $user)
-    {
         switch (strtolower($this->name)) {
             case 'bitcoin':
-                $wallet = $this->createBitcoinWallet($user);
+                $wallet = $crypto->createBitcoinWallet($track_id);
+                break;
+            case 'ethereum':
+                $wallet = $crypto->createEthWallet($track_id);
                 break;
 
             default:
-                # code...
+                throw new ProductionActionUnavailableException("This Coin's implemantation is currently unavailable. Please try for BTC and ETH", "400");
+
                 break;
         }
-        return $wallet;
+
+        // return $wallet;
+
+        $created_wallet = $this->wallets()->create([
+            "user_id" => $user->id,
+            'track_id' => $track_id,
+            'provider' => $wallet->provider ?? 'TestServer',
+            'coin_symbol' => $this->symbol,
+            'address' => $wallet->wallet_address,
+            'private_key' => decrypt($wallet->private_key),
+            'public_key' => decrypt($wallet->public_key),
+            'wif' => $wallet->wif ?? "N/A",
+            'payload' => $wallet,
+            'webhook_url' => $wallet->webhook_url,
+        ]);
+
+        $created_wallet->refresh();
+
+
+        return $created_wallet;
     }
 }

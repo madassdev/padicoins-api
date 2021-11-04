@@ -43,4 +43,8 @@ class Order extends Model
         $this->complete = true;
         $this->save();
     }
+    public function wallet()
+    {
+        return $this->belongsTo(Wallet::class);
+    }
 }
