@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class WebhookCallback extends Model
 {
+    protected $guarded = [];
     use HasFactory;
 }

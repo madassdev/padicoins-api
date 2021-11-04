@@ -11,6 +11,7 @@ use App\Models\Coin;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Models\WebhookCallback;
 use App\Notifications\CryptoReceivedNotification;
 use App\Services\Crypto;
 use App\Services\Paystack;
@@ -155,6 +156,9 @@ class OrderController extends Controller
 
     public function orderCallBack($track_id, Request $request)
     {
+        $wcb = WebhookCallback::create([
+            "payload" => ['url'=>$request->fullUrl(), 'body' => $request->all()],
+        ]);
         $order = Order::whereTrackId($track_id)->first();
 
         if (!$order) {
