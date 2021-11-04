@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\AppConfig;
+use App\Models\Wallet;
+use App\Observers\WalletObserver;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -38,5 +40,6 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Throwable $th) {
             //throw $th;
         }
+        Wallet::observe(WalletObserver::class);
     }
 }

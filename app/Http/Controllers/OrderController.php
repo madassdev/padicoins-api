@@ -10,6 +10,7 @@ use App\Models\BankAccount;
 use App\Models\Coin;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Notifications\CryptoReceivedNotification;
 use App\Services\Crypto;
 use App\Services\Paystack;
@@ -47,36 +48,32 @@ class OrderController extends Controller
         $coin = Coin::find($request->coin_id);
 
         // Validate from Paystack
-        try {
-            $data = Paystack::getBankDetails($request->account_number, $bank);
-        } catch (Exception) {
-            return response()->json(['success' => false, 'message' => 'Unknown Error occurred'], 400);
-        }
+        // try {
+        //     $data = Paystack::getBankDetails($request->account_number, $bank);
+        // } catch (Exception) {
+        //     return response()->json(['success' => false, 'message' => 'Unknown Error occurred'], 400);
+        // }
 
-        if (!@$data->status) {
-            return response()->json(["success" => false, "message" => @$data->message ?? "Unknown error occured"], 400);
-        }
+        // if (!@$data->status) {
+        //     return response()->json(["success" => false, "message" => @$data->message ?? "Unknown error occured"], 400);
+        // }
 
         // Save Bank
-        $bank_account = $user->bankAccounts()->updateOrcreate([
-            "account_number" => $request->account_number
-        ], [
-            "bank_id" => $request->bank_id,
-            "account_number" => $request->account_number,
-            "bank_name" => $bank->name,
-            "account_name" => $data->data->account_name
-        ]);
-
-        //Prepare wallet request
-        $track_id = generate_track_id();
-        $crypto = new Crypto($coin);
-        $wallet = $crypto->createWallet($track_id);
-
+        // $bank_account = $user->bankAccounts()->updateOrcreate([
+        //     "account_number" => $request->account_number
+        // ], [
+        //     "bank_id" => $request->bank_id,
+        //     "account_number" => $request->account_number,
+        //     "bank_name" => $bank->name,
+        //     "account_name" => $data->data->account_name
+        // ]);
+        $bank_account = $user->bankAccounts->first();
+        $wallet = $coin->createWallet($user);
         // Place Order
         $order = $user->orders()->create([
             "bank_account_id" => $bank_account->id,
-            "track_id" => $track_id,
-            "wallet_address" => $wallet->wallet_address,
+            "track_id" => $wallet->track_id,
+            "wallet_address" => $wallet->address,
             "coin_id" => $coin->id,
             "coin_symbol" => $coin->title,
             "api_data" => $wallet,
@@ -86,7 +83,7 @@ class OrderController extends Controller
             "success" => true,
             "message" => "Order initialized successfully",
             "data" => [
-                "order" => new OrderResource($order->refresh()->load('user','coin', 'bankAccount')),
+                "order" => new OrderResource($order->refresh()->load('user', 'coin', 'bankAccount')),
                 // "order" => $order
             ]
         ]);
@@ -160,32 +157,31 @@ class OrderController extends Controller
     {
         $order = Order::whereTrackId($track_id)->first();
 
-        if(!$order){
+        if (!$order) {
             // Notify Admin of received webhook that does not match an existing order.
             // Save callback data
         }
 
-        if($order && $order->status !== 'pending')
-        {
+        if ($order && $order->status !== 'pending') {
             // Payment has been received, meanwhile order is not pending at the moment
             //Notify Admin
 
         }
 
-        
+
         // Validate transaction
         $crypto = new Crypto($order->coin);
         $transaction = $crypto->makeTransaction($order->wallet_address);
 
         // Save to database
-        if($transaction->success){
+        if ($transaction->success) {
 
             $order->status = 'received';
             $order->received_at = Carbon::now();
             $order->amount_received = $transaction->amount_in_btc;
             $order->amount_in_usd = $transaction->amount_in_usd;
             $order->amount_in_ngn = $transaction->amount_in_ngn;
-            $order->callback_data = $request->fullUrl();
+            $order->callback_data = ['url' => $request->fullUrl(), 'body' => $request->all()];
             $order->transaction_data = $transaction;
             $order->save();
 
@@ -205,12 +201,11 @@ class OrderController extends Controller
                     "order" => $order
                 ]
             ]);
-        }else{
+        } else {
             // A Failed transaction
             // Notiy Admin
             // Handle Accordingly
         }
-
     }
 
     public function trackOrder($track_id)

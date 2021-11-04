@@ -33,7 +33,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['aut
 Route::post('/orders', 'OrderController@order');
 Route::post('/verification/bank', 'OrderController@verifyBank');
 Route::get('/orders/callback/{track_id}', 'OrderController@orderCallback')->name('orders.callback');
-Route::post('/admin/orders/callback/{track_id}', 'OrderController@orderCallback')->name('orders.callback')->middleware('auth:sanctum', 'role:admin');
+Route::post('/orders/callback/{track_id}', 'OrderController@orderCallback');
+Route::post('/admin/orders/callback/{track_id}', 'OrderController@orderCallback')->middleware('auth:sanctum', 'role:admin');
 Route::get('/orders/track/{track_id}', 'OrderController@trackOrder')->name('orders.track');
 Route::get('/banks', 'OrderController@banks');
 Route::get('/coins', 'OrderController@coins');

@@ -53,4 +53,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class);
     }
+
+    public function createWallet(Coin $coin)
+    {
+        return $coin->createWallet($this);
+        return $coin;
+    }
 }
