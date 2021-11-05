@@ -159,7 +159,7 @@ class OrderController extends Controller
                 "message" => "Payment transaction validated successfully!",
                 "data" => [
                     "order" => $order,
-                    "err" => $th,
+                    "err" => $th->getMessage(),
                 ]
             ]);
         } else {
