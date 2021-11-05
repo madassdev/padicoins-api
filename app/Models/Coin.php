@@ -54,7 +54,7 @@ class Coin extends Model
             'address' => $wallet->wallet_address,
             'private_key' => decrypt($wallet->private_key),
             'public_key' => decrypt($wallet->public_key),
-            'wif' => $wallet->wif ?? "N/A",
+            'wif' => $wallet->wif ? decrypt($wallet->wif) : "N/A",
             'payload' => $wallet,
             'webhook_url' => $wallet->webhook_url,
         ]);

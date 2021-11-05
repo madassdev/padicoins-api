@@ -57,7 +57,7 @@ class Crypto
         $this->wallet_address = $response['address'];
         $this->private_key = encrypt($response['private']);
         $this->public_key = encrypt($response['public']);
-        $this->wif = $response['wif'];
+        $this->wif = encrypt($response['wif']);
 
         // Prepare webhook request for address.
         $this->webhook_url =  route('orders.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
