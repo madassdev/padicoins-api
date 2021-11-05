@@ -146,8 +146,8 @@ class OrderController extends Controller
             // Notify Admin
             $admins = User::role('admin')->get();
             // return $admins;
+            Notification::send($admins, new CryptoReceivedNotification($order));
             try{
-                Notification::send($admins, new CryptoReceivedNotification($order));
 
             }catch(Throwable $th){
                 // Save to db
