@@ -80,7 +80,7 @@ class Crypto
         $this->wif = encrypt($response['wif']);
 
         // Prepare webhook request for address.
-        $this->webhook_url =  route('orders.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
+        $this->webhook_url =  route('wallets.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
         $wh_url = "https://api.blockcypher.com/v1/btc/main/hooks";
         $wh_data = [
             'event' => 'confirmed-tx',

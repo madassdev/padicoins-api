@@ -271,16 +271,16 @@ class OrderController extends Controller
 
     public function trackOrder($track_id)
     {
-        $order = Order::whereTrackId($track_id)->first();
-        if (!$order) {
-            return response()->json(['success' => false, 'message' => "Order with Track ID: $track_id not found!"], 404);
+        $wallet = Wallet::whereTrackId($track_id)->first();
+        if (!$wallet) {
+            return response()->json(['success' => false, 'message' => "Wallet with Track ID: $track_id not found!"], 404);
         }
 
         return response()->json([
             "success" => true,
-            "message" => "Order with Track ID: $track_id retrieved successfully.",
+            "message" => "Wallet with Track ID: $track_id retrieved successfully.",
             "data" => [
-                "order" => new OrderResource($order->refresh()->load('coin', 'bankAccount')),
+                "order" => new WalletResource($wallet->refresh()->load('coin', 'bankAccount', 'transactions')),
             ]
         ]);
     }

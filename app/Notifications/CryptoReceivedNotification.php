@@ -60,7 +60,7 @@ class CryptoReceivedNotification extends Notification
                     ->line("USD Equivalent: **{$amount_in_usd}USD**")
                     ->line("Naira Equivalent: **{$amount_in_ngn}NGN**")
                     ->line("Track ID: **$track_id**")
-                    ->action('View Transaction', route('admin.orders.show', ["track_id"=>$order->track_id]))
+                    ->action('View Transaction', route('admin.wallets.show', ["track_id"=>$order->track_id]))
                     ->line('Thank you for using our application!');
     }
 

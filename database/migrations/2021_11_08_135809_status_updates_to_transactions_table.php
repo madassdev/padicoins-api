@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class SupdatesToTransactionsTable extends Migration
+class StatusUpdatesToTransactionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +15,8 @@ class SupdatesToTransactionsTable extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             //
+            $table->string('payment_status')->default('panding');
+            $table->boolean('complete')->default(false);
         });
     }
 

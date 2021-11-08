@@ -44,6 +44,33 @@ class Wallet extends Model
         return $state;
     }
 
+    public function saveState($state)
+    {
+        $transactions = collect($state->transactions);
+        $saved_transactions = $transactions->map(function ($t) {
+            $transaction = Transaction::firstOrNew(["hash" => $t['tx_hash']]);
+            $transaction->wallet_id = $this->id;
+            $transaction->type = $t['tx_input_n'] < 0 ? "input" : "output";
+            if ($t['tx_input_n'] < 0) {
+                // It's an input
+                $transaction->type = "input";
+                $transaction->amount_received = $t['value'];
+                $transaction->amount_spent = 0;
+            } else {
+                $transaction->type = "output";
+                $transaction->amount_spent = $t['value'];
+                $transaction->amount_received = 0;
+            }
+            $transaction->transaction_payload = $t;
+            $transaction->confirmations = $t['confirmations'];
+            $transaction->confirmed_at = $t['confirmed'];
+            $transaction->status = $t['confirmations'] ? 'confirmed' : 'unconfirmed';
+            $transaction->save();
+            return $transaction;
+        });
+        return $saved_transactions;
+    }
+
     public function fetchTx($hash)
     {
         $crypto = new Crypto($this->coin);

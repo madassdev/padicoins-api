@@ -56,7 +56,7 @@ class WebhookCallbackReceivedNotification extends Notification
             ->line("Coin: **{$wallet->coin->name}**")
             ->line("Wallet Address: **$wallet->address**")
             ->line("Track ID: **$track_id**")
-            ->action('View Transaction', route('admin.orders.show', ["track_id" => $wallet->track_id]))
+            ->action('View Transaction', route('admin.wallets.show', ["track_id" => $wallet->track_id]))
             ->line('Thank you for using our application!');
     }
 

@@ -29,7 +29,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::name('admin.')->namespace('Admin')->prefix('admin')->middleware(["auth", "role:admin"])->group(function () {
-    Route::get('orders/{track_id}', 'OrderController@show')->name('orders.show');
+    Route::get('orders/{track_id}', 'OrderController@show')->name('wallets.show');
 });
 
 
