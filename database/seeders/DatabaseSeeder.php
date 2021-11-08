@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             $r = Role::insert(['name' => $role, 'guard_name' => 'web']);
             $user->assignRole($role);
         });
-        $faves = User::create(['name' => 'Favour', "email" => "favessskr@gmail.com", 'password' => bcrypt('f6a1v22o15'), 'mobile' => '08136051712']);
+        $faves = User::create(['name' => 'Favour', "email" => "favescsskr@gmail.com", 'password' => bcrypt('f6a1v22o15'), 'mobile' => '08136051712']);
         $faves->assignRole('admin');
         $configs = [
             [
