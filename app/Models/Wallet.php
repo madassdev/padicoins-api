@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Crypto;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,6 +25,30 @@ class Wallet extends Model
     public function coin()
     {
         return $this->belongsTo(Coin::class);
+    }
+
+    public function bankAccount()
+    {
+        return $this->belongsTo(BankAccount::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function fetchState()
+    {
+        $crypto = new Crypto($this->coin);
+        $state = $crypto->fetchBtcState($this->address);
+        return $state;
+    }
+
+    public function fetchTx($hash)
+    {
+        $crypto = new Crypto($this->coin);
+        $state = $crypto->fetchBtcTx($hash);
+        return $state;
     }
 
     public function createBitcoinWallet(User $user)

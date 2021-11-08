@@ -25,7 +25,7 @@ class Coin extends Model
         return $this->hasMany(Wallet::class);
     }
 
-    public function createWallet(User $user)
+    public function createWallet(User $user, BankAccount $bank_account)
     {
         $track_id = generate_track_id();
         $crypto = new Crypto($this);
@@ -48,14 +48,17 @@ class Coin extends Model
 
         $created_wallet = $this->wallets()->create([
             "user_id" => $user->id,
-            'track_id' => $track_id,
-            'provider' => $wallet->provider ?? 'TestServer',
+            "bank_account_id" => $bank_account->id,
             'coin_symbol' => $this->symbol,
+            'track_id' => $track_id,
+
+            'provider' => $wallet->provider ?? 'TestServer',
             'address' => $wallet->wallet_address,
             'private_key' => decrypt($wallet->private_key),
             'public_key' => decrypt($wallet->public_key),
-            'wif' => $wallet->wif ? decrypt($wallet->wif) : "N/A",
+            'wif' => decrypt($wallet->wif),
             'payload' => $wallet,
+            
             'webhook_url' => $wallet->webhook_url,
         ]);
 

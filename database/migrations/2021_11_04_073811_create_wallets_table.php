@@ -16,18 +16,23 @@ class CreateWalletsTable extends Migration
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('coin_id')->nullable();
+            $table->foreignId('bank_account_id')->constrained();
+            $table->decimal('balance', 20, 10)->default(0);
+
+            $table->foreignId('coin_id');
+            $table->string('coin_symbol');
             $table->string('track_id');
             $table->string('provider');
-            $table->string('coin_symbol');
+
             $table->text('address');
             $table->text('private_key');
             $table->text('public_key');
             $table->text('wif')->nullable();
             $table->text('payload')->nullable();
+            $table->text('webhook_url')->nullable();
+            $table->string('status')->default('active');
             $table->text('encryption_key')->nullable();
             $table->string('encryption_protocol')->nullable();
-            $table->text('webhook_url')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

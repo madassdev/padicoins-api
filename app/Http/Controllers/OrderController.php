@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ReportableException;
 use App\Http\Resources\BankResource;
 use App\Http\Resources\CoinResource;
 use App\Http\Resources\OrderResource;
+use App\Http\Resources\WalletResource;
 use App\Models\Bank;
 use App\Models\BankAccount;
 use App\Models\Coin;
 use App\Models\Order;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WebhookCallback;
 use App\Notifications\CryptoReceivedNotification;
+use App\Notifications\WebhookCallbackReceivedNotification;
 use App\Services\Crypto;
 use App\Services\Paystack;
 use Carbon\Carbon;
@@ -49,51 +53,49 @@ class OrderController extends Controller
         $bank = Bank::find($request->bank_id);
         $coin = Coin::find($request->coin_id);
 
-        // Validate from Paystack
-        try {
-            $data = Paystack::getBankDetails($request->account_number, $bank);
-        } catch (Exception) {
-            return response()->json(['success' => false, 'message' => 'Unknown Error occurred'], 400);
+        $bank_account = BankAccount::whereAccountNumber($request->account_number)->whereBankId($bank->id)->first();
+
+        if (!$bank_account) {
+
+            // Validate from Paystack
+            try {
+                $data = Paystack::getBankDetails($request->account_number, $bank);
+            } catch (Exception) {
+                return response()->json(['success' => false, 'message' => 'Unknown Error occurred'], 400);
+            }
+
+            if (!@$data->status) {
+                return response()->json(["success" => false, "message" => @$data->message ?? "Unknown error occured"], 400);
+            }
+
+            // Save Bank
+            $bank_account = $user->bankAccounts()->firstOrCreate([
+                "bank_id" => $request->bank_id,
+                "account_number" => $request->account_number
+            ], [
+                "bank_id" => $request->bank_id,
+                "account_number" => $request->account_number,
+                "bank_name" => $bank->name,
+                "account_name" => @$data->data->account_name
+            ]);
         }
 
-        if (!@$data->status) {
-            return response()->json(["success" => false, "message" => @$data->message ?? "Unknown error occured"], 400);
+
+
+        // Create Wallet
+        $wallet = Wallet::whereUserId($user->id)->whereBankAccountId($bank_account->id)->whereCoinId($coin->id)->first();
+        if (!$wallet) {
+            $wallet = $coin->createWallet($user, $bank_account);
         }
-
-        // Save Bank
-        $bank_account = $user->bankAccounts()->updateOrcreate([
-            "account_number" => $request->account_number
-        ], [
-            "bank_id" => $request->bank_id,
-            "account_number" => $request->account_number,
-            "bank_name" => $bank->name,
-            "account_name" => $data->data->account_name
-        ]);
-
-        // $bank_account = $user->bankAccounts->first();
-        
-        
-        // Create Wallet and Place Order
-        $wallet = $coin->createWallet($user);
-        $order = $user->orders()->create([
-            "bank_account_id" => $bank_account->id,
-            "wallet_id" => $wallet->id,
-            "track_id" => $wallet->track_id,
-            "wallet_address" => $wallet->address,
-            "coin_id" => $coin->id,
-            "coin_symbol" => $coin->symbol,
-            "api_data" => $wallet->payload,
-        ]);
 
         //Notify user
         //Notify Admin
 
         return response()->json([
             "success" => true,
-            "message" => "Order initialized successfully",
+            "message" => "Wallet Initialized successfully",
             "data" => [
-                "order" => new OrderResource($order->refresh()->load('user', 'coin', 'bankAccount')),
-                // "order" => $order
+                "wallet" => new WalletResource($wallet->refresh()->load('user', 'coin', 'bankAccount')),
             ]
         ]);
 
@@ -106,67 +108,104 @@ class OrderController extends Controller
 
     public function orderCallBack($track_id, Request $request)
     {
-        // return $request->header();
-        // $wcb = WebhookCallback::create([
-        //     "payload" => ['url'=>$request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(), ],
-        // ]);
-        $wcb = WebhookCallback::latest()->first();
+        $wcb = WebhookCallback::create([
+            "payload" => ['url' => $request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(),],
+        ]);
+
+        // $wcb = WebhookCallback::latest()->first();
 
 
-        $order = Order::with('wallet', 'coin')->whereTrackId($track_id)->first();
 
-        if (!$order) {
+        $wallet = Wallet::with('user', 'coin', 'bankAccount')->whereTrackId($track_id)->first();
+
+        if (!$wallet) {
             // Notify Admin of received webhook that does not match an existing order.
             // Save callback data
-            $order = Order::latest()->first();
+            $wallet = Wallet::latest()->first();
         }
 
-        if ($order && $order->status !== 'pending') {
-            // Payment has been received, meanwhile order is not pending at the moment
-            //Notify Admin
+        $wcb->wallet_id = $wallet->id;
+        $wcb->save();
 
+        try {
+
+            $wallet_state = $wallet->fetchState();
+            $transactions = collect($wallet_state->transactions);
+            $saved_transactions = $transactions->map(function ($t) use ($wallet, $wcb) {
+                $transaction = Transaction::firstOrNew(["hash" => $t['tx_hash']]);
+                $transaction->wallet_id = $wallet->id;
+                $transaction->type = $t['tx_input_n'] < 0 ? "input" : "output";
+                if ($t['tx_input_n'] < 0) {
+                    // It's an input
+                    $transaction->type = "input";
+                    $transaction->amount_received = $t['value'];
+                    $transaction->amount_spent = 0;
+                } else {
+                    $transaction->type = "output";
+                    $transaction->amount_spent = $t['value'];
+                    $transaction->amount_received = 0;
+                }
+                $transaction->transaction_payload = $t;
+                $transaction->confirmations = $t['confirmations'];
+                $transaction->confirmed_at = $t['confirmed'];
+                $transaction->status = $t['confirmations'] ? 'confirmed' : 'unconfirmed';
+                $transaction->callback_payload = $wcb;
+                $transaction->save();
+                return $transaction;
+            });
+        } catch (Throwable $th) {
+            throw new ReportableException($th);
         }
-
-        // Validate transaction
-        $crypto = new Crypto($order->coin);
-        $transaction = $crypto->makeTransaction($order->wallet_address);
 
         // Save to database
-        if ($transaction->success) {
-
-            $order->status = 'received';
-            $order->received_at = Carbon::now();
-            $order->amount_received = @$transaction->amount_in_btc;
-            $order->amount_in_usd = @$transaction->amount_in_usd;
-            $order->amount_in_ngn = @$transaction->amount_in_ngn;
-            $order->callback_data = $wcb;
-            $order->transaction_data = @$transaction;
-            $order->save();
-
-            // Notify Admin
-            $admins = User::role('admin')->get();
-            // return $admins;
-            $err = null;
-            try{
-                Notification::send($admins, new CryptoReceivedNotification($order));
-
-            }catch(Throwable $th){
-                // Save to db
-                $err = $th;
-            }
-            return response()->json([
-                "success" => true,
-                "message" => "Payment transaction validated successfully!",
-                "data" => [
-                    "order" => $order,
-                    "err" => $th->getMessage(),
-                ]
-            ]);
-        } else {
-            // A Failed transaction
-            // Notiy Admin
-            // Handle Accordingly
+        $admins = User::role('admin')->get();
+        // return $admins;
+        $err = null;
+        try {
+            Notification::send($admins, new WebhookCallbackReceivedNotification($wallet));
+        } catch (Throwable $th) {
+            // Save to db
+            $err = $th;
         }
+        return response()->json([
+            "success" => true,
+            "message" => "Callback processed successfully",
+        ]);
+
+
+        // $hash_exists = Transaction::whereHash($t['hash'])->first();
+
+        $t = $wallet->fetchState($wallet->address);
+        $transaction = $hash_exists;
+        if (!$hash_exists) {
+            $transaction = Transaction::firstOrNew(["hash" => $t['hash']]);
+            $transaction->wallet_id = $wallet->id;
+            return $t;
+            $transaction->type = $t['tx_input_n'] < 0 ? "input" : "output";
+            if ($t['tx_input_n'] < 0) {
+                // It's an input
+                $transaction->type = "input";
+                $transaction->amount_received = $t['value'];
+                $transaction->amount_spent = 0;
+            } else {
+                $transaction->type = "output";
+                $transaction->amount_spent = $t['value'];
+                $transaction->amount_received = 0;
+            }
+            $transaction->transaction_payload = $t;
+            $transaction->confirmations = $t['confirmations'];
+            $transaction->confirmed_at = $t['confirmed'];
+            $transaction->status = $t['confirmations'] ? 'confirmed' : 'unconfirmed';
+            // $transaction->save();
+            return $transaction;
+        }
+        return [$hash_exists, $transaction];
+
+        $wallet->transactions()->create([
+            "hash" => $tx['tx_hash'],
+
+        ]);
+        return [$tx];
     }
 
     public function verifyBank(Request $request)
@@ -227,7 +266,7 @@ class OrderController extends Controller
         ]);
     }
 
-  
+
 
     public function trackOrder($track_id)
     {

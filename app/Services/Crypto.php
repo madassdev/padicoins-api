@@ -47,6 +47,26 @@ class Crypto
         throw new ProductionActionUnavailableException("Not Available on production", "400");
     }
 
+    public function fetchBtcState($address)
+    {
+        $this->wallet_address = $address;
+        $this->provider = cfg('btc_webhook_provider') ?? 'blockcypher';
+        $url = "https://api.blockcypher.com/v1/btc/main/addrs/$address";
+        $response = Http::get($url)->json();
+        $this->address_data = $response;
+        $this->transactions = @$response['txrefs'];
+        return $this;
+    }
+
+    public function fetchBtcTx($hash)
+    {
+        $url = "https://api.blockcypher.com/v1/btc/main/txs/$hash";
+        $response = Http::get($url)->json();
+        $this->tx = $response;
+        // $this->transactions = $response['txrefs'];
+        return $this;
+    }
+
     public function createBitcoinWallet($track_id = null)
     {
         $this->provider = cfg('btc_webhook_provider') ?? 'blockcypher';
@@ -96,6 +116,7 @@ class Crypto
         $this->wallet_address = $response['address'];
         $this->private_key = encrypt($response['private']);
         $this->public_key = encrypt($response['public']);
+        $this->wif = encrypt(@$response['wif']);
         
         // Prepare webhook request for address.
         $this->webhook_url =  route('orders.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
