@@ -60,18 +60,26 @@ class OrderController extends Controller
         // }
 
         $request->validate([
-            "amount_paid" => "required|numeric|min:0", 
-            "currency_paid" => "required|sometimes|in:NGN,USD", 
+            "amount_paid" => "required|numeric|min:0",
+            "currency_paid" => "required|sometimes|in:NGN,USD",
             "hash" => "required"
         ]);
 
         $t = $wallet->saveState($wallet->fetchState());
         $transaction = Transaction::whereHash($request->hash)->first();
-        $transaction->amount_paid = $request->amount_paid;
-        $transaction->paid_at = Carbon::now();
-        $transaction->payment_status  = 'paid';
-        $transaction->complete = true;
-        $transaction->save();
+        if ($transaction) {
+
+            $transaction->amount_paid = $request->amount_paid;
+            $transaction->paid_at = Carbon::now();
+            $transaction->payment_status  = 'paid';
+            $transaction->complete = true;
+            $transaction->save();
+        }else{
+            return response()->json([
+                "success" => false,
+                "message" => "Transaction with Hash: {$request->hash} not found!"
+            ]);
+        }
         return response()->json([
             "success" => true,
             "message" => "Wallet transaction paid out successfully. Transaction has been marked as complete",
