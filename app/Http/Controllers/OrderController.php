@@ -122,7 +122,7 @@ class OrderController extends Controller
             // Notify Admin of received webhook that does not match an existing order.
             // Save callback data
             $wallet = Wallet::latest()->first();
-            return response()->json([],400);
+            return response()->json([], 400);
         }
 
         $wcb->wallet_id = $wallet->id;
@@ -275,12 +275,13 @@ class OrderController extends Controller
         if (!$wallet) {
             return response()->json(['success' => false, 'message' => "Wallet with Track ID: $track_id not found!"], 404);
         }
+        $t = $wallet->saveState($wallet->fetchState());
 
         return response()->json([
             "success" => true,
             "message" => "Wallet with Track ID: $track_id retrieved successfully.",
             "data" => [
-                "order" => new WalletResource($wallet->refresh()->load('coin', 'bankAccount', 'transactions')),
+                "wallet" => new WalletResource($wallet->refresh()->load('coin', 'bankAccount', 'transactions')),
             ]
         ]);
     }
