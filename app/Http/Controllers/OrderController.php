@@ -122,6 +122,7 @@ class OrderController extends Controller
             // Notify Admin of received webhook that does not match an existing order.
             // Save callback data
             $wallet = Wallet::latest()->first();
+            return response()->json([],400);
         }
 
         $wcb->wallet_id = $wallet->id;
