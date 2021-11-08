@@ -78,7 +78,7 @@ class OrderController extends Controller
             return response()->json([
                 "success" => false,
                 "message" => "Transaction with Hash: {$request->hash} not found in Wallet address: {$wallet->address}!"
-            ]);
+            ], 404);
         }
         return response()->json([
             "success" => true,
