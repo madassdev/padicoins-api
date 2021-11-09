@@ -41,7 +41,7 @@ class Crypto
             // https://api.blockchain.info/v2/receive?xpub=$xpub&callback=$callback_url&key=$key&gap_limit=$gap_limit
             $this->wallet_request_data = null;
             $this->wallet_address = "random_wallet_address_goes_here_$track_id";
-            $this->webhook_url =  route('orders.callback', ['track_id' => $track_id]);
+            $this->webhook_url =  route('wallets.callback', ['track_id' => $track_id]);
             return $this;
         }
         throw new ProductionActionUnavailableException("Not Available on production", "400");
@@ -101,7 +101,7 @@ class Crypto
             $this->private_key = "random_private_key$track_id";
             $this->public_key = "random_public_key$track_id";
             $this->wif = "random_wif$track_id";
-            $this->webhook_url =  route('orders.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
+            $this->webhook_url =  route('wallets.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
             return $this;
         }
         throw new ProductionActionUnavailableException("Not Available on production", "400");
