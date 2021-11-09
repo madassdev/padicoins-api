@@ -119,7 +119,7 @@ class Crypto
         $this->wif = encrypt(@$response['wif']);
         
         // Prepare webhook request for address.
-        $this->webhook_url =  route('orders.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
+        $this->webhook_url =  route('wallets.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
         $wh_url = "https://api.blockcypher.com/v1/eth/main/hooks";
         $wh_data = [
             'event' => 'confirmed-tx',
@@ -140,7 +140,7 @@ class Crypto
             $this->private_key = "random_private_key$track_id";
             $this->public_key = "random_public_key$track_id";
             $this->wif = "random_wif$track_id";
-            $this->webhook_url =  route('orders.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
+            $this->webhook_url =  route('wallets.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
             return $this;
         }
         throw new ProductionActionUnavailableException("Not Available on production", "400");
