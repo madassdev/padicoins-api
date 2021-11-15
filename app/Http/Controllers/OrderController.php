@@ -121,6 +121,10 @@ class OrderController extends Controller
 
         $wallet = Wallet::with('user', 'coin', 'bankAccount')->whereTrackId($track_id)->first();
 
+        if($request->mock_address)
+        {
+            $wallet = Wallet::whereAddress($request->mock_address)->first();
+        }
         if (!$wallet) {
             // Notify Admin of received webhook that does not match an existing order.
             // Save callback data
