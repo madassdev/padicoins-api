@@ -29,7 +29,7 @@ class OrderController extends Controller
 
     public function show($track_id)
     {
-        $wallet = Wallet::whereTrackId($track_id)->first();
+        $wallet = Wallet::whereTrackId($track_id)->with('user', 'transactions')->first();
         if (!$wallet) {
             return response()->json(['success' => false, 'message' => "Wallet with Track ID: $track_id not found!"], 404);
         }
