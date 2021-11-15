@@ -23,7 +23,7 @@ class TransactionResource extends JsonResource
             "status" => $this->status,
             "confirmations" => $this->confirmations,
             "confimed_at" => $this->confirmed_at,
-            "amount_received" => $this->amount_received/100000000,
+            "amount_received" => $this->amount_received,
             "type" => $this->type,
             "payment_status" => $this->payment_status === "panding" ? "pending" : $this->payment_status,
             "amount_paid" => $this->amount_paid,
