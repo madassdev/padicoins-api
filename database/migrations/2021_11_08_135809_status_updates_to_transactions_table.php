@@ -15,7 +15,7 @@ class StatusUpdatesToTransactionsTable extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             //
-            $table->string('payment_status')->default('panding');
+            $table->string('payment_status')->default('pending');
             $table->boolean('complete')->default(false);
         });
     }
