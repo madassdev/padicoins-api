@@ -57,6 +57,19 @@ class Crypto
         $this->transactions = @$response['txrefs'];
         return $this;
     }
+    
+
+    public function fetchEthState($address)
+    {
+        $this->wallet_address = $address;
+        $address = "0xea674fdde714fd979de3edf0f56aa9716b898ec8";
+        $this->provider = cfg('btc_webhook_provider') ?? 'blockcypher';
+        $url = "https://api.blockcypher.com/v1/eth/main/addrs/$address";
+        $response = Http::get($url)->json();
+        $this->address_data = $response;
+        $this->transactions = @$response['txrefs'];
+        return $this;
+    }
 
     public function fetchBtcTx($hash)
     {

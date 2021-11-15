@@ -40,13 +40,21 @@ class Wallet extends Model
     public function fetchState()
     {
         $crypto = new Crypto($this->coin);
-        $state = $crypto->fetchBtcState($this->address);
+        $state = $crypto;
+        switch (strtolower($this->coin->name)) {
+            case 'bitcoins':
+                $state = $crypto->fetchBtcState($this->address);
+                break;
+            case 'ethereum':
+                $state = $crypto->fetchEthState($this->address);
+                break;
+        }
         return $state;
     }
 
     public function saveState($state)
     {
-        $transactions = collect($state->transactions);
+        $transactions = collect($state->transactions)->take(10);
         $saved_transactions = $transactions->map(function ($t) {
             $transaction = Transaction::firstOrNew(["hash" => $t['tx_hash']]);
             $transaction->wallet_id = $this->id;

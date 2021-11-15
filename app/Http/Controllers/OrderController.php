@@ -87,7 +87,7 @@ class OrderController extends Controller
         if (!$wallet) {
             $wallet = $coin->createWallet($user, $bank_account);
         }
-        if($request->mock_address){
+        if ($request->mock_address) {
             $wallet = $coin->createMockWallet($user, $bank_account, $request->mock_address);
         }
 
@@ -121,8 +121,7 @@ class OrderController extends Controller
 
         $wallet = Wallet::with('user', 'coin', 'bankAccount')->whereTrackId($track_id)->first();
 
-        if($request->mock_address)
-        {
+        if ($request->mock_address) {
             $wallet = Wallet::whereAddress($request->mock_address)->first();
         }
         if (!$wallet) {
@@ -138,7 +137,7 @@ class OrderController extends Controller
         try {
 
             $wallet_state = $wallet->fetchState();
-            $transactions = collect($wallet_state->transactions);
+            $transactions = collect($wallet_state->transactions)->take(10);
             $saved_transactions = $transactions->map(function ($t) use ($wallet, $wcb) {
                 $transaction = Transaction::firstOrNew(["hash" => $t['tx_hash']]);
                 $transaction->wallet_id = $wallet->id;
@@ -282,7 +281,12 @@ class OrderController extends Controller
         if (!$wallet) {
             return response()->json(['success' => false, 'message' => "Wallet with Track ID: $track_id not found!"], 404);
         }
-        $t = $wallet->saveState($wallet->fetchState());
+        try {
+
+            $t = $wallet->saveState($wallet->fetchState());
+        } catch (Throwable $th) {
+            throw new ReportableException($th);
+        }
 
         return response()->json([
             "success" => true,

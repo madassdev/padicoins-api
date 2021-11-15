@@ -32,6 +32,7 @@ Route::get('/test', function () {
     return inertia('Test');
 });
 Route::name('admin.')->namespace('Admin')->prefix('admin')->middleware(["auth", "role:admin"])->group(function () {
+    Route::get('/', 'AdminController@index');
     Route::get('orders/{track_id}', 'OrderController@show')->name('wallets.show');
 });
 
