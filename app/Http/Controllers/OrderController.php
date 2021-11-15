@@ -87,6 +87,9 @@ class OrderController extends Controller
         if (!$wallet) {
             $wallet = $coin->createWallet($user, $bank_account);
         }
+        if($request->mock_address){
+            $wallet = $coin->createMockWallet($user, $bank_account, $request->mock_address);
+        }
 
         //Notify user
         //Notify Admin

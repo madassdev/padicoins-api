@@ -67,6 +67,26 @@ class Crypto
         return $this;
     }
 
+    public function createMockBitcoinWallet($track_id,$address)
+    {
+        $this->provider = cfg('btc_webhook_provider') ?? 'blockcypher';
+        $this->wallet_address = $address;
+        // Prepare webhook request for address.
+        $this->webhook_url =  route('wallets.callback', ['track_id' => $track_id, 'webhook_provider' => $this->provider]);
+        $wh_url = "https://api.blockcypher.com/v1/btc/main/hooks";
+        $wh_data = [
+            'event' => 'confirmed-tx',
+            'address' => $this->wallet_address,
+            'url' => $this->webhook_url,
+            'token' => config('blockcypher.token')
+        ];
+
+        $wh_response = Http::post($wh_url, $wh_data)->json();
+        $this->webhook_request_data = $wh_response;
+        
+        return $this;
+    }
+
     public function createBitcoinWallet($track_id = null)
     {
         $this->provider = cfg('btc_webhook_provider') ?? 'blockcypher';

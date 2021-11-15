@@ -25,6 +25,33 @@ class Coin extends Model
         return $this->hasMany(Wallet::class);
     }
 
+    public function createMockWallet($user, $bank_account, $address)
+    {
+        $track_id = 'fav-'.generate_track_id();
+        $crypto = new Crypto($this);
+        $wallet = $crypto->createMockBitcoinWallet($track_id, $address);
+        $created_wallet = $this->wallets()->create([
+            "user_id" => $user->id,
+            "bank_account_id" => $bank_account->id,
+            'coin_symbol' => $this->symbol,
+            'track_id' => $track_id,
+
+            'provider' => $wallet->provider ?? 'TestServer',
+            'address' => $wallet->wallet_address,
+            'private_key' => request()->private_key ?? "Unspecified",
+            'public_key' => request()->public_key ?? "Unspecified",
+            'wif' => request()->wif ?? "Unspecified",
+            'payload' => $wallet,
+            
+            'webhook_url' => $wallet->webhook_url,
+        ]);
+
+        $created_wallet->refresh();
+
+
+        return $created_wallet;
+    }
+
     public function createWallet(User $user, BankAccount $bank_account)
     {
         $track_id = generate_track_id();

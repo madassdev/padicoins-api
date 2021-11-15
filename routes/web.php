@@ -28,6 +28,9 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/test', function () {
+    return inertia('Test');
+});
 Route::name('admin.')->namespace('Admin')->prefix('admin')->middleware(["auth", "role:admin"])->group(function () {
     Route::get('orders/{track_id}', 'OrderController@show')->name('wallets.show');
 });

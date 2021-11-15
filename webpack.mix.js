@@ -23,3 +23,17 @@ mix.js('resources/js/app.js', 'public/js')
 if (mix.inProduction()) {
     mix.version();
 }
+
+const domain = "padicoins.dv";
+const homedir = require("os").homedir();
+mix.browserSync({
+    proxy: "https://" + domain,
+    host: domain,
+    open: "external",
+    https: {
+        key: homedir + "/.config/valet/Certificates/" + domain + ".key",
+        cert: homedir + "/.config/valet/Certificates/" + domain + ".crt",
+    },
+});
+
+mix.disableNotifications();
