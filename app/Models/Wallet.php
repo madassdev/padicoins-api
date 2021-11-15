@@ -42,7 +42,7 @@ class Wallet extends Model
         $crypto = new Crypto($this->coin);
         $state = $crypto;
         switch (strtolower($this->coin->name)) {
-            case 'bitcoins':
+            case 'bitcoin':
                 $state = $crypto->fetchBtcState($this->address);
                 break;
             case 'ethereum':
