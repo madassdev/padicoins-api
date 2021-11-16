@@ -29,18 +29,18 @@ class CoinSeeder extends Seeder
                 "type" => "erc20",
                 "title" => "Ethereum (ETH)"
             ],
-            [
-                "name" => "USDT_TRC20",
-                "symbol" => "USDT_TRC20",
-                "type" => "USDT_TRC20",
-                "title" => "USD Tether (USDT_TRC20)"
-            ],
-            [
-                "name" => "BSC",
-                "symbol" => "BSC",
-                "type" => "BSC",
-                "title" => "Binance Coin (BNB_BSC)"
-            ],
+            // [
+            //     "name" => "USDT_TRC20",
+            //     "symbol" => "USDT_TRC20",
+            //     "type" => "USDT_TRC20",
+            //     "title" => "USD Tether (USDT_TRC20)"
+            // ],
+            // [
+            //     "name" => "BSC",
+            //     "symbol" => "BSC",
+            //     "type" => "BSC",
+            //     "title" => "Binance Coin (BNB_BSC)"
+            // ],
         ];
 
         Coin::insert($coins);

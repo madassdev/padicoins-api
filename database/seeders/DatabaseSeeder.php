@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
 
         $roles = ["admin", "user"];
         collect($roles)->map(function($role){
-            $user = User::create(['name' => $role, "email" => $role."@app.dev", 'password' => bcrypt('password'), 'mobile' => '08000000000']);
+            $user = User::create(['name' => $role, "email" => $role."@padicoins.com", 'password' => bcrypt('password'), 'mobile' => '08000000000']);
             $r = Role::insert(['name' => $role, 'guard_name' => 'web']);
             $user->assignRole($role);
         });
