@@ -16,6 +16,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
+    return root_redirect();
     return "Hello and welcome to Padicoins";
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -37,5 +38,7 @@ Route::name('admin.')->namespace('Admin')->prefix('admin')->middleware(["auth", 
     Route::get('orders/{track_id}', 'OrderController@show')->name('wallets.show');
 });
 
+// ssh padicoins@161.97.131.97
+// cp -a ./public/. ./public_html
 
 require __DIR__ . '/auth.php';

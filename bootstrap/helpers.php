@@ -57,4 +57,9 @@ function mock()
 {
     return env("APP_ENV") === "local";
 }
+
+function root_redirect()
+{
+    return env('MAIN_DOMAIN_URL', env('APP_URL')."/redirect");
+}
         // return number_format((float)9897193.989713,5,'.', ',');
