@@ -57,7 +57,7 @@ class OrderController extends Controller
 
         // $t = $wallet->saveState($wallet->fetchState());
 
-        $transaction = $wallet->transactions()->create([
+        $transaction = $wallet->transactions()->updateOrCreate(['hash' => $request->hash], [
             "user_id" => $wallet->user_id,
             "hash" => $request->hash,
             "reference" => 'tx-' . $wallet->track_id . '-' . Str::random(3),
