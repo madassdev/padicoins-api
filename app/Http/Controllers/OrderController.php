@@ -106,7 +106,7 @@ class OrderController extends Controller
 
     public function orderCallBack($track_id, Request $request)
     {
-        $hash = $request->hash ?? "hash-".Carbon::now();
+        $hash = $request->hash ?? "no-hash-in-request-".Carbon::now();
         $wcb = WebhookCallback::create([
             "hash" => $hash,
             "payload" => ['url' => $request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(),],
@@ -130,7 +130,7 @@ class OrderController extends Controller
         // Save to database
         $admins = User::role('admin')->get();
         try {
-            Notification::send($admins, new WebhookCallbackReceivedNotification($wallet));
+            Notification::send($admins, new WebhookCallbackReceivedNotification($wallet, $wcb));
         } catch (Throwable $th) {
             // Save to db
             $err = $th;

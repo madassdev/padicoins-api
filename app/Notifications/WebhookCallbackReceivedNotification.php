@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Wallet;
+use App\Models\WebhookCallback;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -18,11 +19,13 @@ class WebhookCallbackReceivedNotification extends Notification
      * @return void
      */
     public $wallet;
+    public $wcb;
 
-    public function __construct(Wallet $wallet)
+    public function __construct(Wallet $wallet, WebhookCallback $wcb)
     {
         //
         $this->wallet = $wallet;
+        $this->wcb = $wcb;
     }
 
     /**
@@ -47,6 +50,8 @@ class WebhookCallbackReceivedNotification extends Notification
         $wallet = $this->wallet;
         $coin_name = strtoupper($wallet->coin->name);
         $track_id = strtoupper($wallet->track_id);
+        $callback_hash = $this->wcb->hash;
+        $callback_id = $this->wcb->id;
 
         return (new MailMessage)
             ->subject("New $coin_name Webhook Notification Received")
@@ -56,6 +61,8 @@ class WebhookCallbackReceivedNotification extends Notification
             ->line("Coin: **{$wallet->coin->name}**")
             ->line("Wallet Address: **$wallet->address**")
             ->line("Track ID: **$track_id**")
+            ->line("Callback Id: **$callback_id**")
+            ->line("Callback hash: **$callback_hash**")
             ->action('View Transaction', route('admin.wallets.show', ["track_id" => $wallet->track_id]))
             ->line('Thank you for using our application!');
     }
