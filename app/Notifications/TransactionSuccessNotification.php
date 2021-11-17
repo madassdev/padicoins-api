@@ -60,7 +60,7 @@ class TransactionSuccessNotification extends Notification
                     ->line("Account Number: **{$wallet->bankAccount->account_number}**")
                     ->line("Account Name: **{$wallet->bankAccount->account_name}**")
                     ->line("Bank Name: **{$wallet->bankAccount->bank_name}**")
-                    ->line('Thank you for using our Padicoins!');
+                    ->line('Thank you for using Padicoins!');
     }
 
     /**

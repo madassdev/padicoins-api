@@ -56,7 +56,7 @@ class WalletReadyNotification extends Notification
             ->line("Account Name: **{$wallet->bankAccount->account_name}**")
             ->line("Bank Name: **{$wallet->bankAccount->bank_name}**")
             ->line('Your account will be funded once your deposit has been confirmed.')
-            ->line('Thank you for using our Padicoins!');
+            ->line('Thank you for using Padicoins!');
     }
 
     /**
