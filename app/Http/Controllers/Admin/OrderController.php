@@ -70,8 +70,9 @@ class OrderController extends Controller
             "currency_paid" => $request->currency_paid ?? "NGN",
             "status" => "complete",
             "completed_at" => Carbon::now(),
+            "complete" => true
         ]);
-        
+
         return response()->json([
             "success" => true,
             "message" => "Wallet transaction paid out successfully. Transaction has been marked as complete",
