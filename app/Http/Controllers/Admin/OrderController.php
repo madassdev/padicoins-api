@@ -3,14 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\OrderResource;
 use App\Http\Resources\WalletResource;
-use App\Models\Order;
-use App\Models\Transaction;
 use App\Models\Wallet;
-use App\Models\WalletTransaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -63,7 +60,7 @@ class OrderController extends Controller
         $transaction = $wallet->transactions()->create([
             "user_id" => $wallet->user_id,
             "hash" => $request->hash,
-            "reference" => $wallet->track_id,
+            "reference" => 'tx-' . $wallet->track_id . '-' . Str::random(3),
             "amount_received" => $request->amount_received,
             "amount_paid" => $request->amount_paid,
             "currency_received" => $request->currency_received ?? $wallet->coin->symbol,
