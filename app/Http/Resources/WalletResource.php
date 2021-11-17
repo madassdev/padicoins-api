@@ -39,8 +39,7 @@ class WalletResource extends JsonResource
             "address" => $this->address,
             "coin_id" => $this->coin_id,
             "coin_symbol" => $this->coin_symbol,
-            "transactions" => TransactionResource::collection($this->whenLoaded('transactions')),
-            "wallet_transactions" => WalletTransactionResource::collection($this->whenLoaded('walletTransactions')),
+            "transactions" => TransactionMiniResource::collection($this->whenLoaded('transactions')),
             $this->mergeWhen(auth()->user() && auth()->user()->hasRole('admin'), [
                 "balance" => $this->balance,
                 "payload" => $this->payload,

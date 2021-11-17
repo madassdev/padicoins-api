@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Models\WebhookCallback;
 use Illuminate\Bus\Queueable;
@@ -18,13 +19,13 @@ class WebhookCallbackReceivedNotification extends Notification
      *
      * @return void
      */
-    public $wallet;
+    public $transaction;
     public $wcb;
 
-    public function __construct(Wallet $wallet, WebhookCallback $wcb)
+    public function __construct(Transaction $transaction, WebhookCallback $wcb)
     {
         //
-        $this->wallet = $wallet;
+        $this->transaction = $transaction;
         $this->wcb = $wcb;
     }
 
@@ -47,11 +48,13 @@ class WebhookCallbackReceivedNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        $wallet = $this->wallet;
+        $wallet = $this->transaction->wallet;
+        $transaction = $this->transaction;
         $coin_name = strtoupper($wallet->coin->name);
         $track_id = strtoupper($wallet->track_id);
         $callback_hash = $this->wcb->hash;
         $callback_id = $this->wcb->id;
+        $amount_received = $transaction->amount_received;
 
         return (new MailMessage)
             ->subject("New $coin_name Webhook Notification Received")
@@ -59,11 +62,12 @@ class WebhookCallbackReceivedNotification extends Notification
             ->line("A user with email: **{$wallet->user->email}** has made a deposit.")
             ->line("**TRANSACTION DETAILS** \r\n")
             ->line("Coin: **{$wallet->coin->name}**")
+            ->line("Amount received: **$amount_received {$wallet->coin->symbol}**")
             ->line("Wallet Address: **$wallet->address**")
+            ->line("Hash: **$transaction->hash**")
+            ->line("Transaction ID: **$transaction->id**")
             ->line("Track ID: **$track_id**")
-            ->line("Callback Id: **$callback_id**")
-            ->line("Callback hash: **$callback_hash**")
-            ->action('View Transaction', route('admin.wallets.show', ["track_id" => $wallet->track_id]))
+            ->action('View Transaction', route('admin.transactions.show', ["transaction" => $transaction]))
             ->line('Thank you for using our application!');
     }
 

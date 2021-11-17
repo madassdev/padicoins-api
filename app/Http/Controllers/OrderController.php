@@ -21,6 +21,7 @@ use App\Notifications\WalletReadyNotification;
 use App\Notifications\WebhookCallbackReceivedNotification;
 use App\Services\Crypto;
 use App\Services\Paystack;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -123,14 +124,26 @@ class OrderController extends Controller
             $wallet = Wallet::latest()->first();
             return response()->json([], 400);
         }
-
+        
         $wcb->wallet_id = $wallet->id;
         $wcb->save();
+        $block_transaction = collect($wallet->fetchState()->transactions)->where("tx_hash", $hash)->first();
+
+        if($block_transaction && $block_transaction['tx_input_n'] < 0 && $request->hash){
+            $amount_received = $block_transaction['value']/100000000;
+            $transaction = $wallet->transactions()->updateOrCreate(['hash' => $hash], [
+                "user_id" => $wallet->user_id,
+                "hash" => $request->hash,
+                "reference" => 'tx-' . $wallet->track_id . '-' . Str::random(3),
+                "amount_received" => $amount_received,
+                "currency_received" => $request->currency_received ?? $wallet->coin->symbol,
+            ]);
+        }
 
         // Save to database
         $admins = User::role('admin')->get();
+        Notification::send($admins, new WebhookCallbackReceivedNotification($transaction, $wcb));
         try {
-            Notification::send($admins, new WebhookCallbackReceivedNotification($wallet, $wcb));
         } catch (Throwable $th) {
             // Save to db
             $err = $th;
@@ -208,7 +221,6 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => "Wallet with Track ID: $track_id not found!"], 404);
         }
         try {
-
             // $t = $wallet->saveState($wallet->fetchState());
         } catch (Throwable $th) {
             throw new ReportableException($th);

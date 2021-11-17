@@ -145,7 +145,7 @@ class Crypto
         // Prepare address request
         $url = "https://api.blockcypher.com/v1/eth/main/addrs";
         $response = Http::post($url)->json();
-        $this->wallet_address ='0x'.$response['address'];
+        $this->wallet_address = $response['address'];
         $this->private_key = encrypt($response['private']);
         $this->public_key = encrypt($response['public']);
         $this->wif = encrypt(@$response['wif']);

@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TransactionResource extends JsonResource
+class TransactionMiniResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,15 +14,6 @@ class TransactionResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            "id" => $this->id,
-            "wallet_id" => $this->wallet_id,
-            "hash" => $this->hash,
-            "reference" => $this->reference,
-            "type" => $this->type,
-            "amount_received" => $this->amount_received,
-            "wallet" => $this->whenLoaded('wallet'),
-        ];
         return parent::toArray($request);
     }
 }
