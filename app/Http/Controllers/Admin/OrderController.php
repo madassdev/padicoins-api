@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\WalletResource;
+use App\Models\Transaction;
 use App\Models\Wallet;
+use App\Notifications\TransactionSuccessNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -45,7 +47,7 @@ class OrderController extends Controller
     {
         $wallet = Wallet::whereTrackId($track_id)->first();
         if (!$wallet) {
-            return response()->json(['success' => false, 'message' => "Order with Track ID: $track_id not found!"], 404);
+            return response()->json(['success' => false, 'message' => "Wallet with Track ID: $track_id not found!"], 404);
         }
 
         $request->validate([
@@ -56,7 +58,14 @@ class OrderController extends Controller
         ]);
 
         // $t = $wallet->saveState($wallet->fetchState());
-
+        $transaction = Transaction::whereHash($request->hash)->first();
+        if ($transaction) {
+            return response()->json([
+                'success' => false,
+                'message' => "Transaction with Hash: {$request->hash} has already been paid out!"
+            ], 403);
+        }
+        
         $transaction = $wallet->transactions()->updateOrCreate(['hash' => $request->hash], [
             "user_id" => $wallet->user_id,
             "hash" => $request->hash,
@@ -70,6 +79,7 @@ class OrderController extends Controller
             "complete" => true
         ]);
 
+        $wallet->user->notify(new TransactionSuccessNotification($transaction));
         return response()->json([
             "success" => true,
             "message" => "Wallet transaction paid out successfully. Transaction has been marked as complete",

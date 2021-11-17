@@ -58,6 +58,11 @@ function mock()
     return env("APP_ENV") === "local";
 }
 
+function naira($value)
+{
+    return '₦'.number_format($value);
+}
+
 function root_redirect()
 {
     return env('MAIN_DOMAIN_URL', env('APP_URL')."/redirect");

@@ -17,6 +17,7 @@ use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Models\WebhookCallback;
 use App\Notifications\CryptoReceivedNotification;
+use App\Notifications\WalletReadyNotification;
 use App\Notifications\WebhookCallbackReceivedNotification;
 use App\Services\Crypto;
 use App\Services\Paystack;
@@ -33,7 +34,6 @@ class OrderController extends Controller
 
     public function order(Request $request)
     {
-        // return route('orders.callback', ['track_id' => 'ww', 'webhook_provider'=>'alaye']);
         $request->validate([
             "name" => "required|string|max:255",
             "bank_id" => "required|exists:banks,id",
@@ -93,7 +93,7 @@ class OrderController extends Controller
         }
 
         //Notify user
-        //Notify Admin
+        $user->notify(new WalletReadyNotification($wallet));
 
         return response()->json([
             "success" => true,
@@ -102,17 +102,13 @@ class OrderController extends Controller
                 "wallet" => new WalletResource($wallet->refresh()->load('user', 'coin', 'bankAccount')),
             ]
         ]);
-
-        // Send Mail
-
-
-
-        return $request;
     }
 
     public function orderCallBack($track_id, Request $request)
     {
+        $hash = $request->hash ?? "hash-".Carbon::now();
         $wcb = WebhookCallback::create([
+            "hash" => $hash,
             "payload" => ['url' => $request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(),],
         ]);
 
