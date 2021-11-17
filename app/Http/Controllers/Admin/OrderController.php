@@ -8,6 +8,7 @@ use App\Http\Resources\WalletResource;
 use App\Models\Order;
 use App\Models\Transaction;
 use App\Models\Wallet;
+use App\Models\WalletTransaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -43,43 +44,34 @@ class OrderController extends Controller
         ]);
     }
 
-    public function payout($track_id, $force = false, Request $request)
+    public function payout($track_id, Request $request)
     {
         $wallet = Wallet::whereTrackId($track_id)->first();
         if (!$wallet) {
             return response()->json(['success' => false, 'message' => "Order with Track ID: $track_id not found!"], 404);
         }
-        // if ($wallet->status !== "received") {
-        //     if(strtolower($force) !== "force"){
-        //         return response()->json([
-        //             "success" => false,
-        //             "message" => "Order has not been received. Please use the force payout route to approve anyway.",
-        //             "payout_route" => route('payout.force', ["track_id" => $track_id, "force" => "force"])
-        //         ]);
-        //     }
-        // }
 
         $request->validate([
+            "amount_received" => "required|numeric|min:0",
             "amount_paid" => "required|numeric|min:0",
             "currency_paid" => "required|sometimes|in:NGN,USD",
             "hash" => "required"
         ]);
 
-        $t = $wallet->saveState($wallet->fetchState());
-        $transaction = Transaction::whereHash($request->hash)->first();
-        if ($transaction) {
+        // $t = $wallet->saveState($wallet->fetchState());
 
-            $transaction->amount_paid = $request->amount_paid;
-            $transaction->paid_at = Carbon::now();
-            $transaction->payment_status  = 'paid';
-            $transaction->complete = true;
-            $transaction->save();
-        }else{
-            return response()->json([
-                "success" => false,
-                "message" => "Transaction with Hash: {$request->hash} not found in Wallet address: {$wallet->address}"
-            ], 404);
-        }
+        $transaction = $wallet->transactions()->create([
+            "user_id" => $wallet->user_id,
+            "hash" => $request->hash,
+            "reference" => $wallet->track_id,
+            "amount_received" => $request->amount_received,
+            "amount_paid" => $request->amount_paid,
+            "currency_received" => $request->currency_received ?? $wallet->coin->symbol,
+            "currency_paid" => $request->currency_paid ?? "NGN",
+            "status" => "complete",
+            "completed_at" => Carbon::now(),
+        ]);
+        
         return response()->json([
             "success" => true,
             "message" => "Wallet transaction paid out successfully. Transaction has been marked as complete",

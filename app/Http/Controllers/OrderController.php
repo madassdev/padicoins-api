@@ -11,9 +11,10 @@ use App\Models\Bank;
 use App\Models\BankAccount;
 use App\Models\Coin;
 use App\Models\Order;
-use App\Models\Transaction;
+// use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Models\WalletTransaction;
 use App\Models\WebhookCallback;
 use App\Notifications\CryptoReceivedNotification;
 use App\Notifications\WebhookCallbackReceivedNotification;
@@ -115,10 +116,6 @@ class OrderController extends Controller
             "payload" => ['url' => $request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(),],
         ]);
 
-        // $wcb = WebhookCallback::latest()->first();
-
-
-
         $wallet = Wallet::with('user', 'coin', 'bankAccount')->whereTrackId($track_id)->first();
 
         if ($request->mock_address) {
@@ -134,40 +131,8 @@ class OrderController extends Controller
         $wcb->wallet_id = $wallet->id;
         $wcb->save();
 
-        try {
-
-            $wallet_state = $wallet->fetchState();
-            $transactions = collect($wallet_state->transactions)->take(10);
-            $saved_transactions = $transactions->map(function ($t) use ($wallet, $wcb) {
-                $transaction = Transaction::firstOrNew(["hash" => $t['tx_hash']]);
-                $transaction->wallet_id = $wallet->id;
-                $transaction->type = $t['tx_input_n'] < 0 ? "input" : "output";
-                if ($t['tx_input_n'] < 0) {
-                    // It's an input
-                    $transaction->type = "input";
-                    $transaction->amount_received = $t['value'];
-                    $transaction->amount_spent = 0;
-                } else {
-                    $transaction->type = "output";
-                    $transaction->amount_spent = $t['value'];
-                    $transaction->amount_received = 0;
-                }
-                $transaction->transaction_payload = $t;
-                $transaction->confirmations = $t['confirmations'];
-                $transaction->confirmed_at = $t['confirmed'];
-                $transaction->status = $t['confirmations'] ? 'confirmed' : 'unconfirmed';
-                $transaction->callback_payload = $wcb;
-                $transaction->save();
-                return $transaction;
-            });
-        } catch (Throwable $th) {
-            throw new ReportableException($th);
-        }
-
         // Save to database
         $admins = User::role('admin')->get();
-        // return $admins;
-        $err = null;
         try {
             Notification::send($admins, new WebhookCallbackReceivedNotification($wallet));
         } catch (Throwable $th) {
@@ -178,41 +143,6 @@ class OrderController extends Controller
             "success" => true,
             "message" => "Callback processed successfully",
         ]);
-
-
-        // $hash_exists = Transaction::whereHash($t['hash'])->first();
-
-        $t = $wallet->fetchState($wallet->address);
-        $transaction = $hash_exists;
-        if (!$hash_exists) {
-            $transaction = Transaction::firstOrNew(["hash" => $t['hash']]);
-            $transaction->wallet_id = $wallet->id;
-            return $t;
-            $transaction->type = $t['tx_input_n'] < 0 ? "input" : "output";
-            if ($t['tx_input_n'] < 0) {
-                // It's an input
-                $transaction->type = "input";
-                $transaction->amount_received = $t['value'];
-                $transaction->amount_spent = 0;
-            } else {
-                $transaction->type = "output";
-                $transaction->amount_spent = $t['value'];
-                $transaction->amount_received = 0;
-            }
-            $transaction->transaction_payload = $t;
-            $transaction->confirmations = $t['confirmations'];
-            $transaction->confirmed_at = $t['confirmed'];
-            $transaction->status = $t['confirmations'] ? 'confirmed' : 'unconfirmed';
-            // $transaction->save();
-            return $transaction;
-        }
-        return [$hash_exists, $transaction];
-
-        $wallet->transactions()->create([
-            "hash" => $tx['tx_hash'],
-
-        ]);
-        return [$tx];
     }
 
     public function verifyBank(Request $request)
@@ -292,7 +222,7 @@ class OrderController extends Controller
             "success" => true,
             "message" => "Wallet with Track ID: $track_id retrieved successfully.",
             "data" => [
-                "wallet" => new WalletResource($wallet->refresh()->load('coin', 'bankAccount', 'transactions')),
+                "wallet" => new WalletResource($wallet->refresh()->load('coin', 'bankAccount', 'walletTransactions', 'transactions')),
             ]
         ]);
     }

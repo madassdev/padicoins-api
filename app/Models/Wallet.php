@@ -32,6 +32,11 @@ class Wallet extends Model
         return $this->belongsTo(BankAccount::class);
     }
 
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
@@ -56,7 +61,7 @@ class Wallet extends Model
     {
         $transactions = collect($state->transactions)->take(10);
         $saved_transactions = $transactions->map(function ($t) {
-            $transaction = Transaction::firstOrNew(["hash" => $t['tx_hash']]);
+            $transaction = WalletTransaction::firstOrNew(["hash" => $t['tx_hash']]);
             $transaction->wallet_id = $this->id;
             $transaction->type = $t['tx_input_n'] < 0 ? "input" : "output";
             if ($t['tx_input_n'] < 0) {
