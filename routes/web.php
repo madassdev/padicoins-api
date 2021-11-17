@@ -16,7 +16,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return root_redirect();
+    return redirect(root_redirect());
     return "Hello and welcome to Padicoins";
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
