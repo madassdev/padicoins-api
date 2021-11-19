@@ -67,7 +67,7 @@ class WebhookCallbackReceivedNotification extends Notification
             ->line("Hash: **$transaction->hash**")
             ->line("Transaction ID: **$transaction->id**")
             ->line("Track ID: **$track_id**")
-            ->action('View Transaction', route('admin.transactions.show', ["transaction" => $transaction]))
+            ->action('View Transaction', admin_transaction_toute($transaction->id))
             ->line('Thank you for using our application!');
     }
 

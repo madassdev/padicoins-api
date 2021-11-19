@@ -24,17 +24,20 @@ Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
 });
 
 Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['auth:sanctum', 'role:admin']], function () {
-    Route::post('wallets/payout/{wallet}/{transaction}', "OrderController@payout");
-    Route::apiResource('wallets', 'OrderController');
+    Route::post('wallets/{track_id}/payout', "WalletController@payout");
+    Route::apiResource('wallets', 'WalletController');
     Route::apiResource('transactions', 'TransactionController');
 });
 
+Route::get('/banks', 'WalletController@banks');
+Route::get('/coins', 'WalletController@coins');
 
-Route::post('/wallets', 'OrderController@order');
-Route::post('/verification/bank', 'OrderController@verifyBank');
-Route::get('/wallets/callback/{track_id}', 'OrderController@orderCallback')->name('wallets.callback');
-Route::post('/wallets/callback/{track_id}', 'OrderController@orderCallback');
-Route::post('/admin/wallets/callback/{track_id}', 'OrderController@orderCallback')->middleware('auth:sanctum', 'role:admin');
-Route::get('/wallets/track/{track_id}', 'OrderController@trackOrder')->name('wallets.track');
-Route::get('/banks', 'OrderController@banks');
-Route::get('/coins', 'OrderController@coins');
+Route::post('/verification/bank', 'WalletController@verifyBank');
+Route::post('/wallets', 'WalletController@order');
+Route::get('/wallets/track/{track_id}', 'WalletController@trackOrder')->name('wallets.track');
+
+Route::get('/wallets/callback/{track_id}', 'WalletController@orderCallback')->name('wallets.callback');
+Route::post('/wallets/callback/{track_id}', 'WalletController@orderCallback');
+
+Route::post('/admin/wallets/callback/{track_id}', 'Controller@orderCallback')->middleware('auth:sanctum', 'role:admin');
+

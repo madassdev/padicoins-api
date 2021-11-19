@@ -34,7 +34,6 @@ class WalletResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "status" > $this->status,
             "track_id" => $this->track_id,
             "address" => $this->address,
             "coin_id" => $this->coin_id,

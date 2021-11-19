@@ -35,10 +35,10 @@ Route::get('/test', function () {
 });
 Route::name('admin.')->namespace('Admin')->prefix('admin')->middleware(["auth", "role:admin"])->group(function () {
     Route::get('/', 'AdminController@index');
-    Route::get('orders/{track_id}', 'OrderController@show')->name('wallets.show');
+    Route::get('wallets/{track_id}', 'WalletController@show')->name('wallets.show');
     Route::resource('transactions', 'TransactionController');
 });
-
+Route::get('wallets/{track_id}', 'WalletController@show')->name('wallets.show');
 // ssh padicoins@161.97.131.97
 // cp -a ./public/. ./public_html
 

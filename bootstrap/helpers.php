@@ -67,4 +67,15 @@ function root_redirect()
 {
     return env('MAIN_DOMAIN_URL', env('APP_URL')."/redirect");
 }
+
+function track_route($track_id)
+{
+    return route('wallets.show', ["track_id"=>$track_id]);
+}
+
+function admin_transaction_toute($transaction)
+{
+    return route('admin.transactions.show', ["transaction" => $transaction]);
+}
+
         // return number_format((float)9897193.989713,5,'.', ',');

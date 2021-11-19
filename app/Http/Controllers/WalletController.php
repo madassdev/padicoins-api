@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Throwable;
 
-class OrderController extends Controller
+class WalletController extends Controller
 {
     //
 
