@@ -61,7 +61,7 @@ class Coin extends Model
             case 'bitcoin':
                 $wallet = $crypto->createBitcoinWallet($track_id);
                 break;
-            case 'ethereusm':
+            case 'ethereum':
                 $wallet = $crypto->createEthWallet($track_id);
                 break;
 

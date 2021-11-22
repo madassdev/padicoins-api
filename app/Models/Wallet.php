@@ -49,7 +49,7 @@ class Wallet extends Model
                 $value = $value/100000000;
                 break;
             case 'ethereum':
-                // $value = $value/
+                $value = $value/1000000000000000000;
                 break;
         }
         return $value;
