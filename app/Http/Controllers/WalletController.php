@@ -130,7 +130,7 @@ class WalletController extends Controller
         $block_transaction = collect($wallet->fetchState()->transactions)->where("tx_hash", $hash)->first();
 
         if($block_transaction && $block_transaction['tx_input_n'] < 0 && $request->hash){
-            $amount_received = $block_transaction['value']/100000000;
+            $amount_received = $wallet->getBaseValue($block_transaction['value']/100000000);
             $transaction = $wallet->transactions()->updateOrCreate(['hash' => $hash], [
                 "user_id" => $wallet->user_id,
                 "hash" => $request->hash,

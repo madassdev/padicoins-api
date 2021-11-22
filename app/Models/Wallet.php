@@ -42,6 +42,19 @@ class Wallet extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function getBaseValue($value)
+    {
+        switch (strtolower($this->coin->name)) {
+            case 'bitcoin':
+                $value = $value/100000000;
+                break;
+            case 'ethereum':
+                // $value = $value/
+                break;
+        }
+        return $value;
+    }
+
     public function fetchState()
     {
         $crypto = new Crypto($this->coin);
