@@ -35,6 +35,10 @@ class DatabaseSeeder extends Seeder
                 'key' => 'paystack_public_key_test',
                 'value' => 'pk_test_deca92ff9fd72063fce8ed64c97007ed4e0d34e8',
             ],
+            [
+                'key' => 'usd_to_ngn_rate',
+                'value' => 500
+            ]
         ];
 
         collect($configs)->map(function ($config) {

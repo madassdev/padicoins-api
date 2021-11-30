@@ -7,6 +7,7 @@ use App\Http\Resources\BankResource;
 use App\Http\Resources\CoinResource;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\WalletResource;
+use App\Models\AppConfig;
 use App\Models\Bank;
 use App\Models\BankAccount;
 use App\Models\Coin;
@@ -107,14 +108,13 @@ class WalletController extends Controller
 
     public function orderCallBack($track_id, Request $request)
     {
-        $hash = $request->hash ?? "no-hash-in-request-".Carbon::now();
+        $hash = $request->hash ?? "no-hash-in-request-" . Carbon::now();
         $wcb = WebhookCallback::create([
             "hash" => $hash,
             "payload" => ['url' => $request->fullUrl(), 'body' => $request->all(), 'header' => $request->header(), 'ip' => $request->ip(),],
         ]);
 
         $wallet = Wallet::with('user', 'coin', 'bankAccount')->whereTrackId($track_id)->first();
-
         if ($request->mock_address) {
             $wallet = Wallet::whereAddress($request->mock_address)->first();
         }
@@ -124,12 +124,17 @@ class WalletController extends Controller
             $wallet = Wallet::latest()->first();
             return response()->json([], 400);
         }
-        
+
+
+
         $wcb->wallet_id = $wallet->id;
         $wcb->save();
         $block_transaction = collect($wallet->fetchState()->transactions)->where("tx_hash", $hash)->first();
-
-        if($block_transaction && $block_transaction['tx_input_n'] < 0 && $request->hash){
+        if ($block_transaction && $block_transaction['tx_input_n'] < 0 && $request->hash) {
+            $usd_to_ngn_rate = config('app_config')['usd_to_ngn_rate'];
+            $coin_to_usd_rate = $wallet->getRate();
+            $usd_value = round($coin_to_usd_rate * $block_transaction->amount_received, 2);
+            $ngn_value = $usd_value * $usd_to_ngn_rate;
             $amount_received = $wallet->getBaseValue($block_transaction['value']);
             $transaction = $wallet->transactions()->updateOrCreate(['hash' => $hash], [
                 "user_id" => $wallet->user_id,
@@ -137,12 +142,16 @@ class WalletController extends Controller
                 "reference" => 'tx-' . $wallet->track_id . '-' . Str::random(3),
                 "amount_received" => $amount_received,
                 "currency_received" => $request->currency_received ?? $wallet->coin->symbol,
+                "coin_to_usd_rate" => $coin_to_usd_rate,
+                "usd_to_ngn_rate" => $usd_to_ngn_rate,
+                "usd_value" => ($usd_value),
+                "ngn_value" => round($ngn_value),
             ]);
         }
 
         // Save to database
         $admins = User::role('admin')->get();
-        Notification::send($admins, new WebhookCallbackReceivedNotification($transaction, $wcb));
+        // Notification::send($admins, new WebhookCallbackReceivedNotification($transaction, $wcb));
         try {
         } catch (Throwable $th) {
             // Save to db

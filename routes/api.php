@@ -24,6 +24,7 @@ Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
 });
 
 Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['auth:sanctum', 'role:admin']], function () {
+    Route::get('/analytics', 'AdminController@analytics');
     Route::post('wallets/{track_id}/payout', "WalletController@payout");
     Route::apiResource('wallets', 'WalletController');
     Route::apiResource('transactions', 'TransactionController');

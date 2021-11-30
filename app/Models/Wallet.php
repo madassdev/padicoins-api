@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\Crypto;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Http;
 
 class Wallet extends Model
 {
@@ -69,6 +70,25 @@ class Wallet extends Model
         }
         return $state;
     }
+
+    public function getRate()
+    {
+        $rates = json_decode(Http::get('https://bitpay.com/api/rates'));
+        $btc_rate = $rates[2]->rate;
+        $eth_rate = $btc_rate/$rates[13]->rate;
+        switch (strtolower($this->coin->name)) {
+            case 'bitcoin':
+                $rate = $btc_rate;
+                break;
+            case 'ethereum':
+                $rate = $eth_rate;
+                break;
+        }
+        return $rate;
+
+    }
+
+    
 
     public function saveState($state)
     {
