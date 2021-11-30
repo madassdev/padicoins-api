@@ -62,7 +62,7 @@ class WalletController extends Controller
                 "message" => "Transaction Id: {$request->transaction_id} does not exist on the wallet with Track Id: {$track_id}"
             ],404);
         }
-        if (!$transaction->complete) {
+        if ($transaction->complete) {
             return response()->json([
                 "success" => false,
                 "message" => "This Transaction has already been paid out and marked complete."
