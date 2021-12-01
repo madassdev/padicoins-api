@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
@@ -65,4 +66,5 @@ class AdminController extends Controller
 
         return $analytics;
     }
+
 }

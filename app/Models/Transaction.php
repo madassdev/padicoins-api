@@ -12,6 +12,10 @@ class Transaction extends Model
     protected $casts = [
         "amount_paid" => "float",
         "amount_received" => "decimal: 10",
+        "coin_to_usd_rate" => "float",
+        "usd_value" => "float",
+        "usd_to_ngn_rate" => "float",
+        "ngn_value" => "float",
     ];
 
     public function wallet()

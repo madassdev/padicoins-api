@@ -151,7 +151,7 @@ class WalletController extends Controller
 
         // Save to database
         $admins = User::role('admin')->get();
-        // Notification::send($admins, new WebhookCallbackReceivedNotification($transaction, $wcb));
+        Notification::send($admins, new WebhookCallbackReceivedNotification($transaction, $wcb));
         try {
         } catch (Throwable $th) {
             // Save to db
@@ -196,6 +196,13 @@ class WalletController extends Controller
                 "account_name" => $data->data->account_name,
                 "user_details" => $existing_account_details,
             ],
+        ]);
+    }
+
+    public function rates()
+    {
+        return response()->json([
+            "usd_to_ngn" => config('app_config')['usd_to_ngn_rate']
         ]);
     }
 

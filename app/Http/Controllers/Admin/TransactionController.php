@@ -16,7 +16,14 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        
+        $transactions = Transaction::with('wallet.user')->latest()->paginate(30);
+        return response()->json([
+            "success" => true,
+            "message" => "Transactions retrieved successfully",
+            "data" => [
+                "transactions" => TransactionResource::collection($transactions)
+            ]
+        ]);
     }
 
     /**
