@@ -206,6 +206,22 @@ class WalletController extends Controller
         ]);
     }
 
+    public function setRates(Request $request)
+    {
+        $request->validate([
+            "usd_to_ngn_rate" => "required|numeric|min:0",
+        ]);
+
+        // return AppConfig::all();
+        $config = AppConfig::where("key","usd_to_ngn_rate")->first();
+        $config->value = $request->usd_to_ngn_rate;
+        $config->save();
+        return response()->json([
+            "success" => true,
+            "message" => "Rate updated successfully",
+        ]);
+    }
+
     public function banks()
     {
         $banks = Bank::all();

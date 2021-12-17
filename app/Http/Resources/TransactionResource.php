@@ -38,6 +38,7 @@ class TransactionResource extends JsonResource
             "hash" => $this->hash,
             "reference" => $this->reference,
             "type" => $this->type,
+            "status" => $this->status,
             "coin_symbol" => $this->wallet->coin_symbol,
             "amount_received" => $this->amount_received,
             "coin_to_usd_rate" => $this->coin_to_usd_rate,

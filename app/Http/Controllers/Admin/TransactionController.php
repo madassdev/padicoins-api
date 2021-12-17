@@ -14,9 +14,14 @@ class TransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $transactions = Transaction::with('wallet.user')->latest()->paginate(30);
+        if ($request->status) {
+            $transactions = Transaction::with('wallet.user')->whereStatus($request->status)->latest()->paginate(30);
+        } else {
+
+            $transactions = Transaction::with('wallet.user')->latest()->paginate(30);
+        }
         return response()->json([
             "success" => true,
             "message" => "Transactions retrieved successfully",
@@ -34,7 +39,19 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if ($request->status) {
+            $transactions = Transaction::with('wallet.user')->whereStatus($request->status)->latest()->paginate(30);
+        } else {
+
+            $transactions = Transaction::with('wallet.user')->latest()->paginate(30);
+        }
+        return response()->json([
+            "success" => true,
+            "message" => "Transactions retrieved successfully",
+            "data" => [
+                "transactions" => TransactionResource::collection($transactions)
+            ]
+        ]);
     }
 
     /**

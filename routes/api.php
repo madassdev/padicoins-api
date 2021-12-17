@@ -33,6 +33,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['aut
 Route::get('/banks', 'WalletController@banks');
 Route::get('/coins', 'WalletController@coins');
 Route::get('/rates', 'WalletController@rates');
+Route::post('/rates', 'WalletController@setRates');
 
 Route::post('/verification/bank', 'WalletController@verifyBank');
 Route::post('/wallets', 'WalletController@order');
